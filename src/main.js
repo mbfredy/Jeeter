@@ -1,352 +1,342 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import helvetikerBold from 'three/examples/fonts/helvetiker_bold.typeface.json';
 
 import './style.css';
-import { ASSETS, DISTRICTS, OVERVIEW } from './config.js';
-import { CameraManager } from './CameraManager.js';
-import { RaycastManager } from './RaycastManager.js';
+import SCENES from './scenes.json';
+import { ASSETS } from './config.js';
+import { SceneView } from './SceneView.js';
+import { CameraRig } from './CameraRig.js';
 import { ModalManager } from './ModalManager.js';
-import { setMaxAnisotropy, canvasTexture } from './world/textures.js';
-import { freezeStatic, makeHighlighter } from './world/helpers.js';
-import { createEnvironment } from './world/environment.js';
-import { createWaterfallMaterial } from './world/water.js';
-import { buildStadium } from './world/stadium.js';
-import { buildHighsman } from './world/highsman.js';
-import { buildPrimitiv } from './world/primitiv.js';
-import { buildDodi } from './world/dodi.js';
-import { buildVault } from './world/vault.js';
-import { createBlimp, createFireworks, createCoin } from './world/effects.js';
+import { Fireworks, Smoke, Beams, Gulls } from './effects/particles.js';
+import { Blimp } from './effects/Blimp.js';
 
 const root = document.getElementById('jgd-app');
-const $ = (sel) => root.querySelector(sel);
-const canvasHost = $('[data-jgd-canvas]');
+const $ = (s) => root.querySelector(s);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = window.matchMedia('(pointer: coarse)').matches || Math.min(window.innerWidth, window.innerHeight) < 700;
+const coarse = window.matchMedia('(pointer: coarse)').matches;
+const params = new URLSearchParams(window.location.search);
+const BASE = import.meta.env.BASE_URL;
 
-// --- Preloader -------------------------------------------------------------------
-const preloader = {
-  el: $('[data-jgd-preloader]'),
-  bar: $('[data-jgd-progress]'),
-  pct: $('[data-jgd-pct]'),
-  value: 0,
-  set(v) {
-    this.value = Math.max(this.value, v);
-    this.bar.style.width = `${Math.round(this.value * 100)}%`;
-    this.pct.textContent = `${Math.round(this.value * 100)}%`;
-  },
-  hide() {
-    return new Promise((resolve) => {
-      gsap.to(this.el, { opacity: 0, duration: 0.8, delay: 0.15, ease: 'power2.out', onComplete: () => { this.el.remove(); resolve(); } });
-    });
-  },
-};
-
-// --- Renderer / scene / camera -----------------------------------------------------
-const renderer = new THREE.WebGLRenderer({
-  antialias: window.devicePixelRatio < 2,
-  powerPreference: 'high-performance',
-  alpha: false,
-});
-let pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-renderer.setPixelRatio(pixelRatio);
+// --- Renderer ------------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, coarse ? 1.75 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.shadowMap.autoUpdate = false; // the sun is static: bake once, refresh on demand
-canvasHost.appendChild(renderer.domElement);
-setMaxAnisotropy(renderer.capabilities.getMaxAnisotropy());
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // only affects lit meshes (blimp)
+$('[data-jgd-canvas]').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#f2d6b3');
-scene.fog = new THREE.Fog('#efd9bd', 320, 1100);
-
-const camera = new THREE.PerspectiveCamera(45, 1, 1, 2600);
-camera.position.set(0, 260, 420);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.minPolarAngle = Math.PI / 4;
-controls.maxPolarAngle = Math.PI / 2.3;
-controls.minDistance = 35;
-controls.maxDistance = 220;
-controls.screenSpacePanning = false;
-controls.rotateSpeed = 0.6;
-controls.zoomSpeed = 0.8;
-controls.panSpeed = 0.7;
-controls.target.set(...OVERVIEW.target);
-controls.enabled = false;
-
-const cameraManager = new CameraManager(camera, controls, { reducedMotion });
-
-// --- Lighting: golden hour ---------------------------------------------------------
+scene.background = new THREE.Color('#120c2c');
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.55;
+scene.environmentIntensity = 0.7;
 pmrem.dispose();
-
-const hemi = new THREE.HemisphereLight('#d6e6ff', '#b8875a', 1.1);
-scene.add(hemi);
-const sun = new THREE.DirectionalLight('#ffd7a3', 3.1);
-sun.position.set(-170, 150, 120);
-sun.castShadow = true;
-sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
-Object.assign(sun.shadow.camera, { left: -190, right: 190, top: 160, bottom: -160, near: 10, far: 600 });
-sun.shadow.bias = -0.0004;
-sun.shadow.normalBias = 0.6;
+scene.add(new THREE.HemisphereLight('#dfe9ff', '#c49a6c', 1.1));
+const sun = new THREE.DirectionalLight('#ffd6a0', 2.6);
+sun.position.set(-6, 5, 8);
 scene.add(sun);
-scene.add(sun.target);
-const fill = new THREE.DirectionalLight('#9fb6ff', 0.5);
-fill.position.set(160, 80, -100);
-scene.add(fill);
 
-const requestShadowUpdate = () => {
-  renderer.shadowMap.needsUpdate = true;
+const rig = new CameraRig(renderer.domElement, { reducedMotion });
+const modals = new ModalManager(root, { reducedMotion });
+
+// --- Scenes ------------------------------------------------------------------------
+const views = {};
+for (const id of SCENES.order) views[id] = new SceneView(id, SCENES.scenes[id], renderer);
+let current = null;
+let busy = false;
+
+// --- Shared effects ------------------------------------------------------------------
+const fx = {
+  fireworks: new Fireworks(coarse ? 2000 : 4000),
+  blimp: null,
+  smoke: null,
+  beams: null,
+  gulls: null,
+  scale: 300,
+};
+scene.add(fx.fireworks.object);
+fx.fireworks.onBurst = () => {
+  if (!current) return;
+  const u = current.uniforms.uFlash;
+  gsap.fromTo(u, { value: Math.min(0.5, u.value + 0.3) }, { value: 0, duration: 1.2, ease: 'power2.out' });
 };
 
-// --- Asset loading ------------------------------------------------------------------
-function withTimeout(promise, ms, fallback) {
-  return Promise.race([promise, new Promise((r) => setTimeout(() => r(fallback), ms))]);
-}
-
-async function loadFonts() {
-  if (!document.fonts?.load) return;
-  await withTimeout(
-    Promise.all(['64px Yellowtail', '64px Anton', '600 64px Cinzel'].map((f) => document.fonts.load(f).catch(() => null))),
-    3500,
-  );
-}
-
-// Remote logos need CORS to be used in WebGL; on failure the textures fall back
-// to canvas-drawn wordmarks so the world never shows a broken surface.
 function loadImage(url) {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.decoding = 'async';
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = url;
   });
 }
 
-async function loadLogos(onEach) {
-  const out = {};
-  await Promise.all(
-    Object.entries(ASSETS.logos).map(async ([id, url]) => {
-      const img = await withTimeout(loadImage(url), 7000, null);
-      out[id] = img ? { image: img, texture: canvasTexture(img) } : { image: null, texture: null };
-      onEach();
-    }),
-  );
-  return out;
+// Per-scene effect rigs, rebuilt when a scene becomes active.
+function mountSceneFx(view) {
+  for (const k of ['smoke', 'beams', 'gulls']) {
+    if (fx[k]) {
+      scene.remove(fx[k].object);
+      fx[k] = null;
+    }
+  }
+  const def = view.def;
+  const W = view.width;
+  if (def.smoke?.length) {
+    fx.smoke = new Smoke(
+      def.smoke.map(([u, v, strength]) => ({
+        p: view.toWorld(u, v, 0.05),
+        strength,
+        scale: W * 0.012,
+        wind: new THREE.Vector3(W * 0.028, -W * 0.002, 0),
+      })),
+      coarse ? 90 : 160,
+    );
+    fx.smoke.pool.setScale(fx.scale);
+    // pre-warm so plumes are already established when the district appears
+    for (let i = 0; i < 140; i++) fx.smoke.update(i / 20, 1 / 20);
+    scene.add(fx.smoke.object);
+  }
+  if (def.beams?.length) {
+    fx.beams = new Beams(def.beams.map(([u, v]) => view.toWorld(u, v, 0.1)), view.height * 0.9);
+    scene.add(fx.beams.object);
+  }
+  fx.gulls = new Gulls({ x0: -W * 0.5, x1: W * 0.5, y0: view.height * 0.2, y1: view.height * 0.42, z: 0.6 }, 4);
+  scene.add(fx.gulls.object);
+  const b = def.blimp;
+  if (fx.blimp && b) {
+    const top = view.toWorld((b.x0 + b.x1) / 2, b.y, 0);
+    fx.blimp.setPath({ cx: top.x, cy: top.y, rx: ((b.x1 - b.x0) / 2) * W, rz: 0.9, z: 1.4, length: b.scale * W });
+    fx.blimp.object.visible = true;
+  } else if (fx.blimp) fx.blimp.object.visible = false;
 }
 
-// --- World ----------------------------------------------------------------------------
-const world = {
-  env: null,
-  districts: {},
-  highlighters: {},
-  coins: [],
-  blimp: null,
-  fireworks: null,
-  waterfallMat: null,
-  triggers: {},
-};
-
-function buildWorld(logos) {
-  const sunDir = sun.position.clone().normalize();
-  world.env = createEnvironment({ scene, mobile: isMobile, sunDir });
-  freezeStatic(world.env.root);
-
-  const font = new FontLoader().parse(helvetikerBold);
-  world.waterfallMat = createWaterfallMaterial();
-
-  const built = {
-    stadium: buildStadium({ font, mobile: isMobile }),
-    highsman: buildHighsman({ logo: logos.highsman.texture, mobile: isMobile, waterfallMat: world.waterfallMat, waterMat: world.env.waterMat }),
-    primitiv: buildPrimitiv({ logo: logos.primitiv.texture, mobile: isMobile }),
-    dodi: buildDodi({ logo: logos.dodi.texture, mobile: isMobile }),
-    vault: buildVault({ mobile: isMobile, reducedMotion }),
-  };
-  for (const [id, d] of Object.entries(built)) {
-    scene.add(d.group);
-    freezeStatic(d.group);
-    world.districts[id] = d;
-    world.triggers[id] = d.trigger;
-    world.highlighters[id] = makeHighlighter(d.group, DISTRICTS[id].accent);
-  }
-
-  world.blimp = createBlimp();
-  scene.add(world.blimp.object);
-  world.fireworks = createFireworks({ count: isMobile ? 700 : 1500 });
-  scene.add(world.fireworks.object);
-
-  const coinDefs = [
-    { id: 'stadium', label: 'Jeeter', image: null, pos: [0, 38, 0], rim: '#c9a25a' },
-    { id: 'highsman', image: logos.highsman.image, label: 'Highsman', pos: [-75, 32, -25], rim: '#9bc48a' },
-    { id: 'primitiv', image: logos.primitiv.image, label: 'PRIMITIV', pos: [75, 34, -20], rim: '#8fb0ff' },
-    { id: 'dodi', image: logos.dodi.image, label: 'Dodi', pos: [45, 28, 62], rim: '#b9ff9a' },
-    { id: 'vault', label: 'Jeeter', image: null, pos: [-45, 26, 62], rim: '#e0b46a' },
-  ];
-  for (const c of coinDefs) {
-    const coin = createCoin({ image: c.image, label: c.label, position: new THREE.Vector3(...c.pos), rim: c.rim });
-    scene.add(coin.object);
-    world.coins.push(coin);
-  }
-  requestShadowUpdate();
-}
-
-// Optional Draco-compressed master scene. Only fetched if the file exists and
-// really is glTF (dev servers answer missing files with index.html).
-async function loadMasterScene() {
-  try {
-    const res = await fetch(ASSETS.masterScene, { cache: 'force-cache' });
-    if (!res.ok) return;
-    const buf = await res.arrayBuffer();
-    const head = new TextDecoder().decode(new Uint8Array(buf, 0, Math.min(4, buf.byteLength)));
-    if (head !== 'glTF' && head[0] !== '{') return;
-    const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
-      import('three/examples/jsm/loaders/GLTFLoader.js'),
-      import('three/examples/jsm/loaders/DRACOLoader.js'),
-    ]);
-    const draco = new DRACOLoader().setDecoderPath(ASSETS.dracoDecoderPath);
-    const loader = new GLTFLoader().setDRACOLoader(draco);
-    const base = ASSETS.masterScene.substring(0, ASSETS.masterScene.lastIndexOf('/') + 1);
-    const gltf = await new Promise((resolve, reject) => loader.parse(buf, base, resolve, reject));
-    integrateMasterScene(gltf.scene);
-    draco.dispose();
-  } catch (err) {
-    console.info('[jgd] master scene not loaded, using procedural world', err?.message || '');
+function stadiumVolley(n = 6) {
+  if (!current) return;
+  const area = current.def.fireworks;
+  if (!area) return;
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      if (!current?.def.fireworks) return;
+      const u = THREE.MathUtils.lerp(area[0], area[2], Math.random());
+      const v = THREE.MathUtils.lerp(area[1], area[3], Math.random());
+      const to = current.toWorld(u, v, 1.2);
+      const from = current.toWorld(THREE.MathUtils.clamp(u + (Math.random() - 0.5) * 0.06, 0, 1), Math.min(1, v + 0.35), 1.2);
+      fx.fireworks.rocket(from, to, current.width / 16);
+    }, i * (reducedMotion ? 60 : 280));
   }
 }
 
-// Conventions for the authored scene:
-//   trigger_<id>   → raycast volume for that district (rendered invisible)
-//   district_<id>  → replaces the procedural district visuals
-//   environment    → replaces the procedural environment (water/sky kept)
-function integrateMasterScene(gltfScene) {
-  gltfScene.traverse((o) => {
-    if (o.isMesh) {
-      o.castShadow = true;
-      o.receiveShadow = true;
-    }
-    const m = /^trigger_(\w+)$/.exec(o.name);
-    if (m && DISTRICTS[m[1]]) {
-      o.userData.district = m[1];
-      if (o.material) o.material = new THREE.MeshBasicMaterial({ visible: false });
-      world.triggers[m[1]] = o;
-    }
-    const d = /^district_(\w+)$/.exec(o.name);
-    if (d && world.districts[d[1]]) {
-      const g = world.districts[d[1]].group;
-      g.children.forEach((c) => {
-        if (c !== world.districts[d[1]].trigger && c !== world.districts[d[1]].ring) c.visible = false;
-      });
-    }
+// --- Markers (DOM) ----------------------------------------------------------------
+const markerLayer = $('[data-jgd-markers]');
+let markers = [];
+const logoFor = (brand) => (brand === 'jeeter' ? BASE + ASSETS.logos.jeeter : ASSETS.logos[brand]);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+function buildMarkers(view) {
+  markerLayer.innerHTML = '';
+  markers = view.def.hotspots.filter((h) => h.marker !== false).map((h) => {
+    const portal = h.action.startsWith('goto');
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = `jgd-marker${h.primary ? ' is-primary' : ''}${portal ? ' is-portal' : ''}`;
+    el.setAttribute('aria-label', h.label);
+    el.innerHTML = `<span class="jgd-marker__dot"></span><span class="jgd-marker__label"><img alt="" src="${esc(logoFor(h.brand))}" class="is-${h.brand}"><span>${esc(h.label)}</span>${portal ? '<i aria-hidden="true">→</i>' : ''}</span>`;
+    el.querySelector('img').addEventListener('error', (e) => e.target.remove(), { once: true });
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      runAction(h);
+    });
+    el.addEventListener('pointerenter', () => setHover(h));
+    el.addEventListener('pointerleave', () => setHover(null));
+    markerLayer.appendChild(el);
+    const at = h.m || h.c;
+    return { h, el, world: view.toWorld(at[0], at[1], 0.02) };
   });
-  scene.add(gltfScene);
-  raycast.setTargets(Object.values(world.triggers));
-  requestShadowUpdate();
 }
 
-// --- UI -----------------------------------------------------------------------------
-const modals = new ModalManager(root, { reducedMotion });
-const tooltip = $('[data-jgd-tooltip]');
-const hint = $('[data-jgd-hint]');
-const navButtons = [...root.querySelectorAll('[data-jgd-zone]')];
-let currentZone = null;
-let busy = false;
+const tmpV = new THREE.Vector3();
+function placeMarkers() {
+  const w = root.clientWidth;
+  const h = root.clientHeight;
+  for (const m of markers) {
+    tmpV.copy(m.world).project(rig.camera);
+    const x = (tmpV.x * 0.5 + 0.5) * w;
+    const y = (-tmpV.y * 0.5 + 0.5) * h;
+    const off = x < 8 || x > w - 8 || y < 60 || y > h - 70;
+    m.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    m.el.classList.toggle('is-off', off);
+  }
+}
 
+// --- Hover / click on the photo plane -------------------------------------------------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let hovered = null;
+
+function setHover(h) {
+  if (h === hovered || !current) return;
+  hovered = h;
+  const u = current.uniforms;
+  if (h) {
+    u.uHover.value.set(h.c[0], h.c[1], h.r[0], h.r[1]);
+    gsap.to(u.uHoverAmt, { value: 1, duration: 0.35, overwrite: true });
+    if (h.fx === 'rings' || h.fx === 'neon' || current.id === 'dodi') gsap.to(u.uNeon, { value: 1.4, duration: 0.4, overwrite: true });
+    if (h.fx === 'door') gsap.to(u.uDoor.value, { z: 0.35, duration: 0.4, overwrite: true });
+  } else {
+    gsap.to(u.uHoverAmt, { value: 0, duration: 0.35, overwrite: true });
+    if (!modals.isOpen && !busy) {
+      gsap.to(u.uNeon, { value: 0, duration: 0.6, overwrite: true });
+      gsap.to(u.uDoor.value, { z: 0, duration: 0.6, overwrite: true });
+    }
+  }
+  renderer.domElement.style.cursor = h ? 'pointer' : '';
+  markers.forEach((m) => m.el.classList.toggle('is-hover', m.h === h));
+}
+
+function pick(e) {
+  if (!current?.mesh) return null;
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, rig.camera);
+  const hit = raycaster.intersectObject(current.mesh, false)[0];
+  if (!hit) return null;
+  return current.hotspotAt(hit.uv.x, 1 - hit.uv.y);
+}
+
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || busy || modals.isOpen || rig.pointers.size) return;
+  setHover(pick(e));
+});
+let downAt = 0;
+renderer.domElement.addEventListener('pointerdown', () => {
+  downAt = performance.now();
+});
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (busy || modals.isOpen) return;
+  if (rig.dragMoved > 8 || performance.now() - downAt > 500) return;
+  const h = pick(e);
+  if (h) runAction(h);
+});
+
+// --- Actions ---------------------------------------------------------------------------
+async function runAction(h) {
+  if (busy || !current) return;
+  const [verb, target] = h.action.split(':');
+  if (verb === 'goto') return goTo(target, h);
+  busy = true;
+  hideHint();
+  notifyParent('jgd:district', { id: target });
+  const view = current;
+  const u = view.uniforms;
+  rig.locked = true;
+  markerLayer.classList.add('is-hidden');
+  switch (target) {
+    case 'stadium':
+      if (fx.beams) gsap.to(fx.beams, { boost: 1, duration: 0.6, yoyo: true, repeat: 1, repeatDelay: 2 });
+      stadiumVolley(10);
+      await rig.focus(h.c[0], h.c[1] - 0.05, 1.15, 1.2);
+      await wait(900);
+      modals.open('video', { onClose: afterModal });
+      break;
+    case 'vault':
+      await rig.focus(view.def.door[0], view.def.door[1], 2.1, 1.3);
+      gsap.to(u.uDoor.value, { z: 1.2, duration: 1.1, ease: 'power2.out' });
+      fx.fireworks.sparkle(view.toWorld(view.def.door[0], view.def.door[1], 0.3), view.width / 16);
+      await wait(1300);
+      modals.open('vault', {
+        onClose: () => {
+          gsap.to(u.uDoor.value, { z: 0, duration: 0.8 });
+          afterModal();
+        },
+      });
+      break;
+    default:
+      gsap.to(u.uNeon, { value: 1.6, duration: 0.5 });
+      await rig.focus(h.c[0], h.c[1], 1.7, 1.2);
+      modals.open(target, {
+        onClose: () => {
+          gsap.to(u.uNeon, { value: 0, duration: 0.8 });
+          afterModal();
+        },
+      });
+  }
+  busy = false;
+}
+
+function afterModal() {
+  rig.locked = false;
+  markerLayer.classList.remove('is-hidden');
+  rig.reset(1.2);
+}
+
+const transition = $('[data-jgd-transition]');
+const transitionLogo = $('[data-jgd-transition-logo]');
+
+async function goTo(id, fromHotspot = null, { instant = false } = {}) {
+  const next = views[id];
+  if (!next || next === current || (busy && !instant)) return;
+  busy = true;
+  setHover(null);
+  hideHint();
+  if (modals.isOpen) modals.close({ silent: true });
+  setActiveNav(id);
+  notifyParent('jgd:scene', { id });
+  transitionLogo.src = logoFor(next.def.brand);
+  transitionLogo.onerror = () => {
+    transitionLogo.onerror = null;
+    transitionLogo.src = BASE + ASSETS.logos.jeeter;
+  };
+  const loading = next.load(BASE);
+  if (current && !instant) {
+    rig.locked = true;
+    markerLayer.classList.add('is-hidden');
+    if (fromHotspot) rig.focus(fromHotspot.c[0], fromHotspot.c[1], 2.2, 1.0);
+    await wait(reducedMotion ? 0 : 450);
+    await new Promise((r) => gsap.to(transition, { opacity: 1, duration: reducedMotion ? 0.01 : 0.45, ease: 'power2.in', onComplete: r }));
+  }
+  await loading;
+  if (current) current.group.visible = false;
+  current = next;
+  if (!current.group.parent) scene.add(current.group);
+  current.group.visible = true;
+  const primary = next.def.hotspots.find((x) => x.primary) || next.def.hotspots[0];
+  rig.setScene(next, { zoom: instant ? 1 : 1.45, center: primary.c });
+  mountSceneFx(next);
+  buildMarkers(next);
+  markerLayer.classList.remove('is-hidden');
+  $('[data-jgd-title]').textContent = next.def.title;
+  rig.locked = false;
+  rig.reset(reducedMotion ? 0.01 : 1.8);
+  gsap.to(transition, { opacity: 0, duration: reducedMotion ? 0.01 : 0.7, delay: 0.1, ease: 'power2.out' });
+  if (next.def.fireworks && !reducedMotion) setTimeout(() => stadiumVolley(4), 900);
+  busy = false;
+  // warm the cache for the other districts
+  idle(() => Object.values(views).forEach((v) => v.load(BASE).catch(() => {})));
+}
+
+// --- HUD ---------------------------------------------------------------------------------
+const navButtons = [...root.querySelectorAll('[data-jgd-zone]')];
+navButtons.forEach((b) => b.addEventListener('click', () => goTo(b.dataset.jgdZone)));
 function setActiveNav(id) {
   navButtons.forEach((b) => b.classList.toggle('is-active', b.dataset.jgdZone === id));
 }
-
-function hoverDistrict(id, on) {
-  const h = world.highlighters[id];
-  const d = world.districts[id];
-  if (!h || !d) return;
-  gsap.to(h.state, { v: on ? 1 : 0, duration: 0.35, onUpdate: h.apply, overwrite: true });
-  gsap.to(d.ring.material, { opacity: on ? 0.85 : 0, duration: 0.35, overwrite: true });
-  d.onHover?.(on);
-}
-
-let hovered = null;
-const raycast = new RaycastManager({
-  camera,
-  dom: renderer.domElement,
-  isBlocked: () => modals.isOpen || busy,
-  onHover(id, client) {
-    if (id !== hovered) {
-      if (hovered) hoverDistrict(hovered, false);
-      if (id) hoverDistrict(id, true);
-      hovered = id;
-    }
-    if (id) {
-      const r = root.getBoundingClientRect();
-      tooltip.textContent = DISTRICTS[id].label;
-      tooltip.style.transform = `translate(${client.x - r.left + 16}px, ${client.y - r.top + 16}px)`;
-      tooltip.classList.add('is-visible');
-    } else tooltip.classList.remove('is-visible');
-  },
-  onClick(id) {
-    activate(id);
-  },
-});
-
-async function activate(id) {
-  const d = DISTRICTS[id];
-  if (!d || busy) return;
-  busy = true;
-  currentZone = id;
-  tooltip.classList.remove('is-visible');
+const mapBtn = $('[data-jgd-map]');
+mapBtn.addEventListener('click', () => goTo('map'));
+const hint = $('[data-jgd-hint]');
+function hideHint() {
   hint.classList.add('is-hidden');
-  setActiveNav(id);
-  notifyParent('jgd:district', { id });
-  if (modals.isOpen) modals.close({ silent: true });
-
-  if (id === 'stadium') world.fireworks.launch(isMobile ? 5 : 8);
-  await cameraManager.focusDistrict(d);
-
-  if (id === 'vault') {
-    const v = world.districts.vault;
-    await v.openDoor(requestShadowUpdate);
-    modals.open('vault', { onClose: () => v.closeDoor(requestShadowUpdate) });
-  } else {
-    modals.open(d.modal);
-  }
-  busy = false;
 }
 
-async function overview() {
-  if (busy) return;
-  if (modals.isOpen) modals.close();
-  currentZone = null;
-  setActiveNav(null);
-  busy = true;
-  await cameraManager.flyTo(OVERVIEW.position, OVERVIEW.target, { duration: 2 });
-  busy = false;
-}
-
-navButtons.forEach((b) => b.addEventListener('click', () => activate(b.dataset.jgdZone)));
-$('[data-jgd-overview]').addEventListener('click', overview);
-
-// Parent-page bridge (Webflow iframe): window.postMessage({type:'jgd:zone', zone:'dodi'}, '*')
 window.addEventListener('message', (e) => {
-  const msg = e.data;
-  if (!msg || typeof msg !== 'object') return;
-  if (msg.type === 'jgd:zone' && DISTRICTS[msg.zone]) activate(msg.zone);
-  if (msg.type === 'jgd:overview') overview();
+  const m = e.data;
+  if (!m || typeof m !== 'object') return;
+  if (m.type === 'jgd:zone' && views[m.zone]) goTo(m.zone);
 });
 function notifyParent(type, payload) {
   if (window.parent !== window) window.parent.postMessage({ type, ...payload }, '*');
 }
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 1200));
 
 // --- Resize / visibility ----------------------------------------------------------------
 function resize() {
@@ -355,98 +345,88 @@ function resize() {
   renderer.setSize(w, h, false);
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
-  cameraManager.resize(w, h);
+  rig.resize(w, h);
+  fx.scale = (h * renderer.getPixelRatio()) / (2 * Math.tan(THREE.MathUtils.degToRad(rig.camera.fov / 2)));
+  fx.fireworks.pool.setScale(fx.scale);
+  fx.smoke?.pool.setScale(fx.scale);
 }
 new ResizeObserver(resize).observe(root);
-resize();
-
 let inView = true;
-new IntersectionObserver(([entry]) => {
-  inView = entry.isIntersecting;
-}).observe(root);
+new IntersectionObserver(([e]) => (inView = e.isIntersecting)).observe(root);
 
-// --- Loop ---------------------------------------------------------------------------------
+// --- Loop -------------------------------------------------------------------------------------
 const clock = new THREE.Clock();
-let elapsed = 0;
-let frameTimes = [];
-let lastFireworks = 0;
-
+let t = 0;
+let nextVolley = 6;
 function tick() {
   requestAnimationFrame(tick);
-  if (!inView || document.hidden) {
-    clock.getDelta();
-    return;
-  }
   const dt = Math.min(clock.getDelta(), 1 / 20);
-  elapsed += dt;
-  const t = elapsed;
-
-  cameraManager.update();
-  raycast.update();
-
-  world.env.update(t, dt);
-  world.waterfallMat.uniforms.uTime.value = t;
-  for (const d of Object.values(world.districts)) d.update?.(t, dt);
-  world.blimp.update(t, dt);
-  world.fireworks.update(t, dt);
-  for (const c of world.coins) c.update(t);
-
-  // occasional celebration over the stadium while idle on the overview
-  if (!reducedMotion && !modals.isOpen && t - lastFireworks > 14) {
-    lastFireworks = t;
-    world.fireworks.launch(3);
+  if (!inView || document.hidden || !current) return;
+  t += dt;
+  rig.update(t, dt);
+  current.update(t);
+  fx.fireworks.update(t, dt);
+  fx.smoke?.update(t, dt);
+  fx.beams?.update(t);
+  fx.gulls?.update(t, dt);
+  fx.blimp?.update(t, dt);
+  if (current.def.fireworks && !modals.isOpen && !reducedMotion && t > nextVolley) {
+    nextVolley = t + 3.5 + Math.random() * 3;
+    stadiumVolley(current.id === 'stadium' ? 3 : 2);
   }
-
-  renderer.render(scene, camera);
-  adaptQuality(dt);
+  placeMarkers();
+  renderer.render(scene, rig.camera);
 }
 
-// Drop pixel ratio if the device can't hold ~45fps; never below 1.
-function adaptQuality(dt) {
-  frameTimes.push(dt);
-  if (frameTimes.length < 120) return;
-  const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-  frameTimes = [];
-  if (avg > 1 / 45 && pixelRatio > 1) {
-    pixelRatio = Math.max(1, pixelRatio - 0.25);
-    renderer.setPixelRatio(pixelRatio);
-    resize();
-  }
-}
+// --- Boot -------------------------------------------------------------------------------------
+const pre = {
+  el: $('[data-jgd-preloader]'),
+  bar: $('[data-jgd-progress]'),
+  pct: $('[data-jgd-pct]'),
+  set(v) {
+    this.bar.style.width = `${Math.round(v * 100)}%`;
+    this.pct.textContent = `${Math.round(v * 100)}%`;
+  },
+};
 
-// --- Boot ------------------------------------------------------------------------------------
 async function boot() {
-  preloader.set(0.05);
-  await loadFonts();
-  preloader.set(0.3);
-  let done = 0;
-  const logos = await loadLogos(() => preloader.set(0.3 + (++done / 3) * 0.4));
-  preloader.set(0.75);
-  await new Promise((r) => requestAnimationFrame(r));
-  buildWorld(logos);
-  raycast.setTargets(Object.values(world.triggers));
-  preloader.set(0.9);
-  // compile shaders before revealing so the first frames don't hitch
-  renderer.compile(scene, camera);
-  renderer.render(scene, camera);
-  preloader.set(1);
+  pre.set(0.08);
+  const [logo] = await Promise.all([
+    loadImage(BASE + ASSETS.logos.jeeter),
+    document.fonts?.load ? Promise.race([document.fonts.load("64px 'Anton'"), wait(2500)]).catch(() => {}) : null,
+  ]);
+  fx.blimp = new Blimp(logo);
+  scene.add(fx.blimp.object);
+  pre.set(0.25);
+
+  // The full map is optional: it becomes the hub once public/scenes/map.webp exists.
+  let hub = 'stadium';
+  try {
+    await views.map.load(BASE);
+    hub = 'map';
+    mapBtn.hidden = false;
+  } catch {
+    delete views.map;
+  }
+  pre.set(0.6);
+  const start = views[params.get('zone')] ? params.get('zone') : hub;
+  await views[start].load(BASE);
+  pre.set(0.95);
+  resize();
+  await goTo(start, null, { instant: true });
+  renderer.compile(scene, rig.camera);
+  pre.set(1);
   tick();
-  await preloader.hide();
-
-  const params = new URLSearchParams(window.location.search);
-  const zone = params.get('zone');
-  const camOnly = DISTRICTS[params.get('cam')]; // ?cam=<id>: frame a district without opening its modal
-  if (camOnly) await cameraManager.focusDistrict(camOnly, { duration: 0.01 });
-  else await cameraManager.flyTo(OVERVIEW.position, OVERVIEW.target, { duration: 3.2, ease: 'power2.inOut' });
-  if (!reducedMotion) world.fireworks.launch(isMobile ? 4 : 7);
-  if (zone && DISTRICTS[zone]) activate(zone);
-  setTimeout(() => hint.classList.add('is-hidden'), 7000);
-
-  loadMasterScene();
+  gsap.to(pre.el, { opacity: 0, duration: 0.8, delay: 0.2, onComplete: () => pre.el.remove() });
+  const primary = current.def.hotspots.find((x) => x.primary) || current.def.hotspots[0];
+  rig.setScene(current, { zoom: 1.35, center: primary.c });
+  rig.reset(reducedMotion ? 0.01 : 2.6);
+  setTimeout(hideHint, 9000);
 }
+
+if (params.has('debug')) window.__jgd = { fx, rig, views, get current() { return current; }, stadiumVolley, runAction, goTo };
 
 boot().catch((err) => {
   console.error(err);
-  preloader.pct.textContent = 'Unable to start 3D. Please try a different browser.';
+  pre.pct.textContent = 'Unable to start. Please try another browser.';
 });
-

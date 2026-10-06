@@ -226,12 +226,14 @@
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
-.jgd-nav__btn i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--c);
-  box-shadow: 0 0 10px var(--c);
+.jgd-nav__btn img {
+  height: 18px;
+  max-width: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+.jgd-nav__btn.is-active img {
+  filter: invert(1) drop-shadow(0 0 0 transparent);
 }
 .jgd-nav__btn:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -282,9 +284,166 @@
 }
 
 .jgd-has-modal .jgd-nav,
-.jgd-has-modal .jgd-hint {
+.jgd-has-modal .jgd-hint,
+.jgd-has-modal .jgd-markers {
   opacity: 0;
   pointer-events: none;
+}
+
+.jgd-brand__logo {
+  height: 34px;
+  width: auto;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.35));
+}
+.jgd-preloader__logo {
+  width: min(260px, 60vw);
+  height: auto;
+}
+.jgd-scene-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--jgd-glass);
+  border: 1px solid var(--jgd-line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ---------- Hotspot markers ---------- */
+.jgd-markers {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.jgd-markers.is-hidden {
+  opacity: 0;
+}
+.jgd-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: transform;
+}
+.jgd-marker.is-off {
+  visibility: hidden;
+}
+.jgd-marker__dot {
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 211, 77, 0.45), 0 0 18px rgba(255, 211, 77, 0.9);
+}
+.jgd-marker__dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 233, 160, 0.9);
+  animation: jgd-ping 2.2s ease-out infinite;
+}
+.jgd-marker.is-portal .jgd-marker__dot {
+  width: 14px;
+  height: 14px;
+  left: -7px;
+  top: -7px;
+  background: #cfd8ff;
+  box-shadow: 0 0 0 3px rgba(120, 140, 255, 0.45), 0 0 14px rgba(140, 160, 255, 0.8);
+}
+@keyframes jgd-ping {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.jgd-marker__label {
+  position: absolute;
+  left: 16px;
+  top: -17px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(14, 9, 38, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.jgd-marker__label img {
+  height: 18px;
+  max-width: 70px;
+  object-fit: contain;
+}
+.jgd-marker__label i {
+  font-style: normal;
+  opacity: 0.8;
+}
+.jgd-marker.is-primary .jgd-marker__label,
+.jgd-marker.is-hover .jgd-marker__label,
+.jgd-marker:focus-visible .jgd-marker__label {
+  opacity: 1;
+  transform: none;
+}
+.jgd-marker:focus-visible {
+  outline: none;
+}
+.jgd-marker:focus-visible .jgd-marker__dot {
+  outline: 2px solid #ffd34d;
+  outline-offset: 4px;
+}
+@media (pointer: coarse) {
+  .jgd-marker .jgd-marker__label {
+    opacity: 1;
+    transform: none;
+    height: 30px;
+    font-size: 12px;
+  }
+}
+
+/* ---------- Scene transition ---------- */
+.jgd-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, #2b1a6e 0%, #120c2c 70%);
+}
+.jgd-transition img {
+  max-width: min(320px, 56vw);
+  max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 30px rgba(0, 0, 0, 0.5));
 }
 
 /* ---------- Modals (shared) ---------- */
@@ -852,8 +1011,21 @@
   }
 }
 @media (max-width: 640px) {
-  .jgd-wordmark {
-    font-size: 28px;
+  .jgd-brand__logo {
+    height: 26px;
+  }
+  .jgd-scene-title {
+    display: none;
+  }
+  .jgd-nav__btn {
+    flex-direction: column;
+    gap: 2px;
+    min-height: 48px;
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+  .jgd-nav__btn img {
+    height: 15px;
   }
   .jgd-brand__tag {
     font-size: 10px;

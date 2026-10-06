@@ -1,105 +1,87 @@
-# Jeeter · Game Day Kickoff: Interactive 3D World
+# Jeeter · Game Day Kickoff: Interactive World
 
-Vite + Three.js (r169) + GSAP. A procedural, fully interactive version of the
-Game Day Kickoff map: the Jeeter stadium at the centre, Highsman (Ricky
-Williams) on the western hillside, PRIMITIV (Calvin Johnson) in the north-east
-industrial quarter, Dodi (Marshawn Lynch) on the Oakland-style waterfront and
-Jeeter's Vault on the marina, with the beach, bay and suspension bridge from the
-composite key art.
+Each district is one of the campaign renders, brought to life in WebGL
+(Vite + Three.js + GSAP). The renders stay photoreal; the app adds:
+
+- **Isometric parallax.** Each render sits on a depth-displaced plane. Pointer
+  tilt, idle drift, drag-to-pan and pinch/wheel zoom give a diorama feel.
+- **Living surfaces** (shader, driven by a per-scene effect mask): water
+  ripple and sun glints, flowing waterfalls, twinkling windows and string
+  lights, pulsing LED screens and neon (Beast Quake green, PRIMITIV blue,
+  Vault gold).
+- **Effects:**
+  - fireworks over the stadium, on a timer and in volleys on click
+  - factory smoke from the PRIMITIV stacks, chimney smoke at the Highsman lodge
+  - stadium light beams
+  - gulls
+  - a 3D Jeeter blimp with LED dot-matrix screens on both sides scrolling the
+    Jeeter logo (from `public/brand/jeeter-logo.svg`)
+- **Hotspots** with brand-logo markers. Hover glows the area; click flies in
+  and opens that district's experience. Portal markers jump to neighbouring
+  districts.
+
+| District | Main action |
+| --- | --- |
+| Game Day Stadium | Light beams and a firework volley, then the YouTube launch video |
+| Highsman | Lodge, Highsman sign, 34 Pavilion: athlete bio, wellness, soundbites |
+| PRIMITIV | Factory, 81 Hall of Fame, lab: formulation explorer |
+| Dodi | Clubhouse, #24 mural, Beast Quake (neon surges on hover): store drawer |
+| The Vault | Zoom to the vault door, gold glow and sparkles: collectible card locker |
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
-npm run build     # static output in /dist
-npm run preview
+npm run dev        # http://localhost:5173
+npm run build      # static site in /dist
 ```
 
-## Project layout
+## Files
 
-| File | Role |
+| Path | Role |
 | --- | --- |
-| `index.html` | Mount point `#jgd-app`, preloader, HUD + quick-nav, every modal's DOM |
-| `src/main.js` | Renderer, lighting, asset loading, world assembly, hover/click flow, render loop |
-| `src/CameraManager.js` | GSAP camera flights (position + lookAt together, arced), OrbitControls limits, FOV per viewport |
-| `src/RaycastManager.js` | Hover (mouse) and tap/click (touch) picking against `trigger_*` volumes |
-| `src/ModalManager.js` | YouTube modal, Highsman feature, PRIMITIV lab, Dodi drawer, Vault card locker |
-| `src/config.js` | **Edit here:** district coordinates, logo URLs, video ID, all modal copy, product links |
-| `src/world/*.js` | Procedural districts, environment, water shaders, canvas textures, blimp/fireworks/coins |
-| `webflow/` | Copy-paste Webflow embed snippets (iframe and direct) |
+| `src/scenes.json` | **Per-scene layout**: hotspots (image coords 0–1), water/waterfall/neon regions, smoke emitters, blimp path, fireworks area |
+| `src/config.js` | Logo URLs, YouTube ID, all modal copy and product links |
+| `src/SceneView.js` | Photo plane with depth displacement and the effects shader |
+| `src/CameraRig.js` | Pan / zoom / tilt camera and GSAP focus moves |
+| `src/effects/` | Fireworks, smoke, light beams, gulls, LED blimp |
+| `src/ModalManager.js` | Video modal, Highsman and PRIMITIV features, Dodi drawer, Vault locker |
+| `tools/build_assets.py` | Builds `public/scenes/*` from `tools/src-*.webp` |
+| `webflow/` | Webflow embed snippets |
 
-## Districts
+## Updating art
 
-| Zone | Trigger | Focus | Camera | Click opens |
-| --- | --- | --- | --- | --- |
-| Game Day Stadium | `trigger_stadium` | (0, 6, 0) | (0, 36, 68) | Fireworks + YouTube modal |
-| Highsman | `trigger_highsman` | (-75, 8, -25) | (-48, 26, 20) | Athlete bio, highlights, soundbites |
-| PRIMITIV | `trigger_primitiv` | (75, 6, -20) | (50, 22, 26) | Botanical lab / formulation explorer (hover spins the orbital rings) |
-| Dodi | `trigger_dodi` | (45, 4, 60) | (24, 18, 96) | Slide-out store drawer (hover pulses the Beast Quake neon) |
-| The Vault | `trigger_vault` | (-45, 4, 65) | (-28, 16, 96) | Vault wheel spins, door swings open, collectible locker |
+1. Drop a render in `tools/` as `src-<scene>.webp` (`stadium`, `highsman`,
+   `primitiv`, `dodi`, `vault`, or `map`).
+2. Run `pip install opencv-python-headless numpy` once, then `npm run assets`.
+   This upscales the render, writes `public/scenes/<scene>.webp`, and writes
+   the effect mask `<scene>-fx.png` (R = water, G = waterfall, B = lights/neon).
+3. Adjust hotspot positions in `src/scenes.json` if the composition changed.
 
-Orbit limits: polar π/4 to π/2.3, distance 35 to 220, panning clamped to the
-map. FOV is 45° on landscape and eases to 65° on portrait.
+**Full map hub.** Save the full-map render as `tools/src-map.webp` and run
+`npm run assets`. The app detects `public/scenes/map.webp` and starts on the
+map, with hotspots that dive into each district (already defined in
+`scenes.json`) and a "Full map" button in the HUD. The static blimp in the map
+art is painted out at build time and replaced by the animated one.
 
-## Content to supply before launch
+## Content to supply
 
-All of these live in `src/config.js`:
+All in `src/config.js`:
 
-- `VIDEO.youtubeId`: the campaign launch video (11-character YouTube ID). Until
-  it's set the stadium modal shows a "drops soon" card. `?video=<id>` overrides it per page.
-- `CONTENT.highsman.soundbites[].src`: hosted MP3/M4A files. Empty entries render
-  a disabled "Dropping on game day" row.
-- `CONTENT.dodi.products`: names, prices and checkout URLs (currently placeholders).
-- `CONTENT.primitiv.formulations`: terpene numbers are illustrative sample data.
-- CTA links for Highsman and PRIMITIV.
+- `VIDEO.youtubeId`: the launch video. `?video=<id>` also works.
+- Highsman soundbite audio URLs.
+- Dodi product names, prices and checkout links (currently placeholders).
+- PRIMITIV formulation data and CTA links.
 
-## Brand logos
+## URL parameters and iframe API
 
-Logos are loaded from the Webflow CDN with `crossOrigin="anonymous"` so they can
-be drawn into WebGL textures (coins, signage). If the CDN does not send CORS
-headers, or the request fails, every surface falls back to a canvas-drawn
-wordmark. The modals use plain `<img>` tags and are unaffected.
+- `?zone=stadium|highsman|primitiv|dodi|vault|map` opens on that scene.
+- Parent page: `iframe.contentWindow.postMessage({ type: 'jgd:zone', zone: 'vault' }, '*')`.
+- The app posts `{ type: 'jgd:scene' | 'jgd:district', id }` to the parent, for analytics.
 
-## Optional authored scene (GLTF + Draco)
+## Performance
 
-Drop a Draco-compressed `public/models/gameday-master.glb` (or pass
-`?scene=https://…/file.glb`) and it is loaded after the procedural world is up.
-Naming conventions:
-
-- `trigger_<id>`: becomes that district's click volume (rendered invisible)
-- `district_<id>`: hides the procedural visuals for that district
-
-The loader is code-split and only downloaded when the file exists.
-
-## URL parameters
-
-| Param | Effect |
-| --- | --- |
-| `?zone=<id>` | Fly to a district and open its experience after load |
-| `?cam=<id>` | Frame a district without opening its modal (QA, screenshots) |
-| `?video=<id>` | Override the YouTube ID |
-| `?scene=<url>` | Load a different master GLB |
-
-## Parent-page API (iframe)
-
-```js
-iframe.contentWindow.postMessage({ type: 'jgd:zone', zone: 'vault' }, '*');
-iframe.contentWindow.postMessage({ type: 'jgd:overview' }, '*');
-// the world posts { type: 'jgd:district', id } to the parent on every open
-```
-
-## Performance notes
-
-- Repeated props (palms, pines, buildings, crowd, cars, rocks, umbrellas) are `InstancedMesh`.
-- Static sub-trees have `matrixAutoUpdate` disabled. The shadow map is rendered
-  once and refreshed only while the vault door animates.
-- Hover raycasts hit only five primitive trigger volumes, once per frame.
-- Pixel ratio is capped (2 desktop, 1.5 mobile) and drops automatically if the
-  frame rate falls below ~45 fps. Rendering pauses when the embed is scrolled
-  off-screen or the tab is hidden.
-- Mobile gets smaller shadow maps and fewer instances.
-
-## Webflow
-
-See `webflow/embed-iframe.html` (recommended) and `webflow/embed-direct.html`.
-`public/_headers` adds the CORS and caching headers that the direct embed needs
-on Netlify / Cloudflare Pages.
+- About 1 MB of WebP per district, loaded on demand. Other districts
+  prefetch during idle time.
+- One draw call per scene plus pooled GPU particles.
+- Rendering pauses when the embed is off-screen or the tab is hidden.
+- `prefers-reduced-motion` disables drift and ambient fireworks and makes
+  transitions instant.

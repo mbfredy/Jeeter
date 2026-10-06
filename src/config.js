@@ -12,82 +12,19 @@ export const BRAND = {
 
 export const ASSETS = {
   logos: {
+    jeeter: 'brand/jeeter-logo.svg',
     highsman:
       'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16c5dfe0cc409b90ca_highsman.png',
     dodi: 'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16002e34ad2dd962da_dodi.png',
     primitiv:
       'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16cb42fa020a497491_primitiv-p-500.png',
   },
-  // Optional Draco-compressed master scene. If the file is missing the
-  // procedural world is used; override with ?scene=https://.../file.glb
-  masterScene: params.get('scene') || 'models/gameday-master.glb',
-  dracoDecoderPath: 'https://www.gstatic.com/draco/versioned/decoders/1.5.6/',
 };
 
 // Campaign launch video. Override per page with ?video=<YouTubeID>.
 export const VIDEO = {
   youtubeId: params.get('video') || 'REPLACE_WITH_YOUTUBE_ID',
 };
-
-export const OVERVIEW = {
-  position: [0, 118, 182],
-  target: [0, 0, 8],
-};
-
-export const DISTRICTS = {
-  stadium: {
-    id: 'stadium',
-    trigger: 'trigger_stadium',
-    label: 'Game Day Stadium',
-    short: 'Stadium',
-    accent: '#5b7cff',
-    focus: [0, 6, 0],
-    camera: [0, 36, 68],
-    modal: 'video',
-  },
-  highsman: {
-    id: 'highsman',
-    trigger: 'trigger_highsman',
-    label: 'Highsman · Ricky Williams',
-    short: 'Highsman',
-    accent: '#3fa46a',
-    focus: [-75, 8, -25],
-    camera: [-48, 26, 20],
-    modal: 'highsman',
-  },
-  primitiv: {
-    id: 'primitiv',
-    trigger: 'trigger_primitiv',
-    label: 'PRIMITIV · Calvin Johnson',
-    short: 'PRIMITIV',
-    accent: '#2f6bff',
-    focus: [75, 6, -20],
-    camera: [50, 22, 26],
-    modal: 'primitiv',
-  },
-  dodi: {
-    id: 'dodi',
-    trigger: 'trigger_dodi',
-    label: 'Dodi · Marshawn Lynch',
-    short: 'Dodi',
-    accent: '#7dff4f',
-    focus: [45, 4, 60],
-    camera: [24, 18, 96],
-    modal: 'dodi',
-  },
-  vault: {
-    id: 'vault',
-    trigger: 'trigger_vault',
-    label: 'Jeeter · The Vault',
-    short: 'The Vault',
-    accent: '#e0b46a',
-    focus: [-45, 4, 65],
-    camera: [-28, 16, 96],
-    modal: 'vault',
-  },
-};
-
-export const DISTRICT_ORDER = ['stadium', 'highsman', 'primitiv', 'dodi', 'vault'];
 
 // ---------------------------------------------------------------------------
 // Editable modal copy. Product names, prices and links are placeholders until

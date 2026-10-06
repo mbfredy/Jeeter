@@ -1,5 +1,8 @@
 /assets/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=31536000, immutable
-/models/*
+/scenes/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+/brand/*
   Access-Control-Allow-Origin: *
