@@ -74,9 +74,15 @@ export class ModalManager {
   _athleteHTML(a, drawer) {
     const tags = [a.type, a.format, '1G All-in-One · CA exclusive'].map((t) => `<li>${esc(t)}</li>`).join('');
     const flavor = a.flavor.map((f) => `<li>${esc(f)}</li>`).join('');
+    const clip = VIDEOS[a.brand];
+    const video = clip
+      ? `<button type="button" class="jgd-vtile" data-jgd-open="video" data-jgd-clip="${a.brand}" aria-label="Play ${esc(a.athlete)}’s Game Day short">
+          <span class="jgd-vtile__thumb" style="background-image:url(https://i.ytimg.com/vi/${clip.id}/hqdefault.jpg)"><span class="jgd-vtile__play" aria-hidden="true"></span></span>
+          <span class="jgd-vtile__text"><span class="jgd-kicker">Game Day short</span><b>Watch ${esc(a.athlete)}</b><small>${esc(a.strain)} · Tap to play</small></span>
+        </button>`
+      : '';
     const ctas = `<div class="jgd-ctas">
         <a class="jgd-btn jgd-btn--solid" href="${DROP.storesUrl}" target="_blank" rel="noopener">Find a store near you</a>
-        <button type="button" class="jgd-btn jgd-btn--ghost" data-jgd-open="video" data-jgd-clip="${a.brand}">▶ Watch ${esc(a.athlete.split(' ')[0])}’s short</button>
       </div>`;
     const card = `<div class="jgd-pair">
         <div class="jgd-pair__card">${this._cardHTML(a)}</div>
@@ -93,14 +99,14 @@ export class ModalManager {
         <div class="jgd-drawer__product"><img src="${BASE + a.product}" alt="${esc(a.strain)} ${esc(a.format)}" /></div>
         <p class="jgd-copy">${esc(a.copy)}</p>
         <ul class="jgd-flavor">${flavor}</ul>
-        ${card}${ctas}`;
+        ${video}${card}${ctas}`;
     }
     return `<div class="jgd-feature__hero"><img class="jgd-feature__product" src="${BASE + a.product}" alt="${esc(a.strain)} ${esc(a.format)}" /></div>
       <div class="jgd-feature__body">
         ${head}
         <p class="jgd-copy">${esc(a.copy)}</p>
         <ul class="jgd-flavor">${flavor}</ul>
-        ${card}${ctas}
+        ${video}${card}${ctas}
       </div>`;
   }
 

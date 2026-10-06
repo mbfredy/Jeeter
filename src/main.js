@@ -139,7 +139,8 @@ function buildMarkers(view) {
     el.type = 'button';
     el.className = `jgd-marker${h.primary ? ' is-primary' : ''}${portal ? ' is-portal' : ''}`;
     el.setAttribute('aria-label', h.label);
-    el.innerHTML = `<span class="jgd-marker__dot"></span><span class="jgd-marker__label"><img alt="" src="${esc(logoFor(h.brand))}" class="is-${h.brand}"><span>${esc(h.label)}</span>${portal ? '<i aria-hidden="true">→</i>' : ''}</span>`;
+    const [title, sub] = h.label.split(' · ');
+    el.innerHTML = `<span class="jgd-marker__dot"></span><span class="jgd-marker__label"><img alt="" src="${esc(logoFor(h.brand))}" class="is-${h.brand}"><span class="jgd-marker__text"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span>${portal ? '<i aria-hidden="true">→</i>' : ''}</span>`;
     el.querySelector('img').addEventListener('error', (e) => e.target.remove(), { once: true });
     el.addEventListener('click', (e) => {
       e.stopPropagation();

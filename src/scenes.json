@@ -33,7 +33,7 @@
       "fireworks": [0.6, 0.03, 0.96, 0.1],
       "beams": [[0.2, 0.34], [0.33, 0.2], [0.66, 0.2], [0.77, 0.33]],
       "hotspots": [
-        { "action": "open:stadium", "label": "Watch the Game Day short", "brand": "jeeter", "c": [0.48, 0.4], "r": [0.27, 0.3], "primary": true },
+        { "action": "open:stadium", "label": "Game Day Short · Tap to watch", "brand": "jeeter", "c": [0.48, 0.4], "r": [0.27, 0.3], "primary": true },
         { "action": "goto:primitiv", "label": "PRIMITIV", "brand": "primitiv", "c": [0.115, 0.21], "r": [0.075, 0.06] },
         { "action": "goto:highsman", "label": "Highsman", "brand": "highsman", "c": [0.08, 0.88], "r": [0.075, 0.07] },
         { "action": "goto:dodi", "label": "Dodi", "brand": "dodi", "c": [0.94, 0.43], "r": [0.055, 0.06] }
@@ -102,7 +102,7 @@
       "blimp": { "y": 0.12, "x0": 0.45, "x1": 0.95, "scale": 0.09 },
       "door": [0.385, 0.54],
       "hotspots": [
-        { "action": "open:vault", "label": "Open The Vault", "brand": "jeeter", "c": [0.385, 0.54], "r": [0.06, 0.13], "primary": true, "fx": "door" },
+        { "action": "open:vault", "label": "The Vault · Collectible cards", "brand": "jeeter", "c": [0.385, 0.54], "r": [0.06, 0.13], "primary": true, "fx": "door" },
         { "action": "open:vault", "label": "Collectible cards", "brand": "jeeter", "c": [0.6, 0.48], "r": [0.2, 0.22] },
         { "action": "goto:stadium", "label": "Game Day Stadium", "brand": "jeeter", "c": [0.18, 0.08], "r": [0.18, 0.08] }
       ]
