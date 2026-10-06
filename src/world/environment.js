@@ -183,6 +183,18 @@ export function hillHeight(x, z) {
   const dl = Math.hypot(x + 76, z + 26);
   const k = THREE.MathUtils.smoothstep(dl, 14, 36);
   h = THREE.MathUtils.lerp(8, Math.max(h, 2), k);
+  // terrace drop in front of the lodge so its stone wall + sign stand proud
+  {
+    const dx = x + 75;
+    const dz = z + 25;
+    const lx = dx * Math.cos(0.54) - dz * Math.sin(0.54);
+    const lz = dx * Math.sin(0.54) + dz * Math.cos(0.54);
+    const front =
+      THREE.MathUtils.smoothstep(lz, 10.5, 12.8) *
+      (1 - THREE.MathUtils.smoothstep(lz, 32, 44)) *
+      (1 - THREE.MathUtils.smoothstep(Math.abs(lx), 15, 23));
+    h = THREE.MathUtils.lerp(h, Math.min(h, 1.2), front);
+  }
   // fade into flat city ground towards the east / south
   const fadeX = THREE.MathUtils.smoothstep(-x, 52, 70);
   const fadeZ = THREE.MathUtils.smoothstep(-z, -26, -6);
@@ -315,6 +327,7 @@ export function createEnvironment({ scene, mobile, sunDir }) {
     if (Math.hypot(x + 76, z + 26) < 17) continue; // lodge
     if (Math.hypot(x + 94, z + 30) < 9) continue; // waterfall channel
     if (x > -60 && z > 0) continue;
+    if (inSightline(x, z, 9)) continue;
     pinePts.push({ x, y: h - 0.3, z });
   }
   root.add(makePines(pinePts, { mobile }));
@@ -397,7 +410,7 @@ export function createEnvironment({ scene, mobile, sunDir }) {
     palmPts.push({ x, z: BOULEVARD_Z - 5 }, { x: x + 4, z: BOULEVARD_Z + 5 });
   }
   for (let x = -98; x <= 120; x += 7) {
-    if (x > -40 && x < 30) continue;
+    if (x > -62 && x < 30) continue;
     palmPts.push({ x, z: 77 + rand(-0.5, 0.5) });
   }
   // dense palm grove between plaza and beach (composite reference)
@@ -407,7 +420,7 @@ export function createEnvironment({ scene, mobile, sunDir }) {
     palmPts.push({ x, z, s: rand(0.8, 1.15) });
   }
   for (let i = 0; i < 26; i++) palmPts.push({ x: rand(-22, 22), z: rand(26, 32) });
-  root.add(makePalms(palmPts.filter((p) => !(Math.abs(p.x) < 9 && p.z > 30 && p.z < 44) && !(p.z < 60 && inSightline(p.x, p.z, 5))), { mobile }));
+  root.add(makePalms(palmPts.filter((p) => !(Math.abs(p.x) < 9 && p.z > 30 && p.z < 44) && !(p.z < 60 && inSightline(p.x, p.z, 6.5))), { mobile }));
 
   const shrubPts = [];
   for (let i = 0; i < (mobile ? 200 : 420); i++) {
@@ -420,6 +433,7 @@ export function createEnvironment({ scene, mobile, sunDir }) {
     if (x < -52 && z < 30) continue; // hillside
     if (Math.abs(z - BOULEVARD_Z) < 4) continue;
     if (Math.abs(x) < 12 && z > 28 && z < 46) continue; // fountain plaza
+    if (inSightline(x, z, 4)) continue;
     shrubPts.push({ x, z, s: rand(0.5, 1.2) });
   }
   root.add(makeShrubs(shrubPts));
@@ -430,8 +444,8 @@ export function createEnvironment({ scene, mobile, sunDir }) {
     const a = rand(0, TAU);
     jac.push({ x: Math.cos(a) * (RING.rx + rand(8, 13)), y: 2.5, z: Math.sin(a) * (RING.rz + rand(8, 13)), s: rand(1.6, 2.4) });
   }
-  for (let i = 0; i < 16; i++) jac.push({ x: rand(-95, -30), y: 2.5, z: rand(55, 74), s: rand(1.4, 2.2) });
-  const jacFiltered = jac.filter((p) => !(Math.abs(p.z - BOULEVARD_Z) < 4) && !(p.x > 22 && p.z > 46 && p.x < 90));
+  for (let i = 0; i < 6; i++) jac.push({ x: rand(-100, -72), y: 2.5, z: rand(55, 74), s: rand(1.4, 2.2) });
+  const jacFiltered = jac.filter((p) => !(Math.abs(p.z - BOULEVARD_Z) < 4) && !(p.x > 22 && p.z > 46 && p.x < 90) && !inSightline(p.x, p.z, 7));
   root.add(instanced(new THREE.IcosahedronGeometry(1.4, 1), std({ color: '#ffffff', flatShading: true }), jacFiltered, { colors: ['#8a6ad0', '#9d7fe0', '#7b5cc4'].map((x) => new THREE.Color(x)), cast: !mobile }));
   root.add(instanced(new THREE.CylinderGeometry(0.15, 0.25, 2.5, 5).translate(0, 1.25, 0), std({ color: '#5a4636' }), jacFiltered.map((p) => ({ ...p, y: 0, s: 1 }))));
 

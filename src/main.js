@@ -173,7 +173,7 @@ function buildWorld(logos) {
     highsman: buildHighsman({ logo: logos.highsman.texture, mobile: isMobile, waterfallMat: world.waterfallMat, waterMat: world.env.waterMat }),
     primitiv: buildPrimitiv({ logo: logos.primitiv.texture, mobile: isMobile }),
     dodi: buildDodi({ logo: logos.dodi.texture, mobile: isMobile }),
-    vault: buildVault({ mobile: isMobile }),
+    vault: buildVault({ mobile: isMobile, reducedMotion }),
   };
   for (const [id, d] of Object.entries(built)) {
     scene.add(d.group);

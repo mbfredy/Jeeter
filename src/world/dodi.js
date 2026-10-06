@@ -65,8 +65,8 @@ export function buildDodi({ logo, mobile }) {
 
   // --- Mural wall ---------------------------------------------------------------
   const wall = new THREE.Group();
-  wall.position.set(60, 0, 60);
-  wall.rotation.y = -0.25;
+  wall.position.set(62, 0, 67);
+  wall.rotation.y = -0.55;
   wall.add(box(16, 9, 1.2, brickWing, 0, 0, 0));
   const mural = panel(15.4, 8.4, muralTexture(), { emissive: 0.2 });
   mural.position.set(0, 4.6, 0.62);
@@ -89,7 +89,7 @@ export function buildDodi({ logo, mobile }) {
 
   // --- Cafés, umbrellas, string lights -----------------------------------------
   const umb = [];
-  for (let i = 0; i < 16; i++) umb.push({ x: rand(26, 68), y: 0, z: rand(70, 77), s: rand(0.9, 1.1) });
+  for (let i = 0; i < 14; i++) umb.push({ x: rand(46, 74), y: 0, z: rand(71, 77), s: rand(0.9, 1.1) });
   group.add(instanced(new THREE.ConeGeometry(1.8, 0.8, 10).translate(0, 2.8, 0), std({ color: '#ffffff' }), umb, { colors: ['#f2ede0', '#1b1c20', '#e8e1cf'] }));
   group.add(instanced(new THREE.CylinderGeometry(0.05, 0.05, 2.8, 5).translate(0, 1.4, 0), std({ color: '#ccc' }), umb));
   group.add(instanced(new THREE.CylinderGeometry(0.7, 0.7, 0.1, 10).translate(0, 1, 0), std({ color: '#5a4636' }), umb));
@@ -100,9 +100,9 @@ export function buildDodi({ logo, mobile }) {
       bulbs.push({ x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t - Math.sin(Math.PI * t) * 1.2, z: a[2] + (b[2] - a[2]) * t, s: 1 });
     }
   };
-  strand([26, 5, 69], [46, 5, 72]);
-  strand([46, 5, 72], [68, 5, 69]);
-  strand([26, 5, 77], [68, 5, 77]);
+  strand([46, 5, 71], [60, 5, 73]);
+  strand([60, 5, 73], [74, 5, 71]);
+  strand([46, 5, 77], [74, 5, 77]);
   strand([48, 12, 70], [62, 5, 77]);
   group.add(instanced(new THREE.SphereGeometry(0.16, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffe0a0, toneMapped: false }), bulbs));
 

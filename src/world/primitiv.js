@@ -125,7 +125,7 @@ export function buildPrimitiv({ logo, mobile }) {
   const labSign = logo
     ? panel(10, 3.4, logo, { emissive: 0.6, transparent: true })
     : panel(10, 3.4, textPanel([{ text: 'PRIMITIV', size: 0.6 }, { text: 'MOTOR CITY WORKS', size: 0.25 }], { w: 1024, h: 340, bg: 'rgba(0,0,0,0)', font: FONT_BLOCK }), { emissive: 0.6, transparent: true });
-  labSign.position.set(0, 9, 6.55);
+  labSign.position.set(0, 9, 8.2);
   lab.add(labSign);
   const cult = panel(3.4, 9, bannerTexture({ top: '', lines: ['CULTI-', 'VATING', 'A HIGHER', 'TOMORROW'], bg: [cobalt, '#0e2a8a'] }), { emissive: 0.45 });
   cult.position.set(10.05, 8, 2);

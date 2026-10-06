@@ -41,8 +41,8 @@ export function buildStadium({ font, mobile }) {
   // glass facade with warm lit concourses
   const cols = 8;
   const rows = 7;
-  const fMap = windowGridTexture({ w: 256, h: 256, cols, rows, frame: '#d7e0ee', glass: '#5b6f93', lit: '#ffd9a3', litChance: 0.7 });
-  const fEm = windowEmissiveTexture({ w: 256, h: 256, cols, rows, litChance: 0.7, lit: '#ffc979' });
+  const fMap = windowGridTexture({ w: 256, h: 256, cols, rows, frame: '#e3eaf5', glass: '#6d86b8', lit: '#ffd9a3', litChance: 0.55 });
+  const fEm = windowEmissiveTexture({ w: 256, h: 256, cols, rows, litChance: 0.55, lit: '#ffc979' });
   fMap.repeat.set(22, 1);
   fEm.repeat.set(22, 1);
   const facadeMat = std({ map: fMap, emissive: 0xffffff, emissiveMap: fEm, emissiveIntensity: 0.55, roughness: 0.25, metalness: 0.35 });
@@ -83,17 +83,6 @@ export function buildStadium({ font, mobile }) {
   const roofMat = std({ map: roofTex, color: '#dfe9ff', roughness: 0.18, metalness: 0.45, emissive: 0x1a2a55, emissiveIntensity: 0.25, side: THREE.DoubleSide });
   const roof = mesh(new THREE.LatheGeometry(prof, 128), roofMat);
   oval.add(roof);
-  // roof rib structure
-  const ribMat = std({ color: '#f4f6fb', metalness: 0.6, roughness: 0.3 });
-  for (let i = 0; i < 48; i++) {
-    const a = (i / 48) * TAU;
-    const rib = mesh(new THREE.BoxGeometry(11.5, 0.25, 0.25), ribMat, { cast: false });
-    rib.position.set(Math.cos(a) * (R - 4.3), 21.5, Math.sin(a) * (R - 4.3));
-    rib.rotation.y = -a;
-    rib.rotation.z = -0.12;
-    oval.add(rib);
-  }
-
   // seating bowl (stepped lathe) with crowd texture
   const seatProf = [];
   const tiers = 3;

@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { stoneTexture, jeeterWordmark, textPanel, holoCardTexture, woodTexture, FONT_SERIF } from './textures.js';
 import { std, mesh, box, cyl, panel, instanced, makeShrubs, makePalms, hoverRing, invisibleTrigger, rand, TAU } from './helpers.js';
 
-export function buildVault({ mobile }) {
+export function buildVault({ mobile, reducedMotion = false }) {
   const group = new THREE.Group();
   group.name = 'district_vault';
 
@@ -19,10 +19,10 @@ export function buildVault({ mobile }) {
   group.add(rot);
 
   // stone drum with a glazed sector to the right of the door
-  const G0 = -0.02 * Math.PI;
-  const GL = 0.48 * Math.PI;
+  const G0 = 0.08 * Math.PI;
+  const GL = 0.4 * Math.PI;
   rot.add(mesh(new THREE.CylinderGeometry(R, R, 9, 64, 1, true, G0 + GL, TAU - GL).translate(0, 4.5, 0), stone));
-  const interior = mesh(new THREE.CylinderGeometry(R - 0.4, R - 0.4, 8.6, 48, 1, true, G0, GL).translate(0, 4.5, 0), std({ color: '#3a2a1a', emissive: 0x6a4420, emissiveIntensity: 0.6, side: THREE.BackSide }), { cast: false });
+  const interior = mesh(new THREE.CylinderGeometry(R - 0.4, R - 0.4, 8.6, 48, 1, true, G0, GL).translate(0, 4.5, 0), std({ color: '#5a3c20', emissive: 0xb07030, emissiveIntensity: 0.9, side: THREE.BackSide }), { cast: false });
   rot.add(interior);
   const glass = mesh(
     new THREE.CylinderGeometry(R, R, 8.2, 48, 1, true, G0, GL).translate(0, 4.4, 0),
@@ -61,7 +61,7 @@ export function buildVault({ mobile }) {
   const tv = panel(11.5, 1.6, textPanel([{ text: 'THE VAULT', size: 0.8, color: '#f4e1b8' }], { w: 1024, h: 140, bg: '#4a3018', font: FONT_SERIF }), { emissive: 0.7 });
   tv.position.set(0, 10.9, R + 3.28);
   const signGroup = new THREE.Group();
-  signGroup.rotation.y = -0.2 * Math.PI;
+  signGroup.rotation.y = -0.13 * Math.PI;
   signGroup.add(signBack, jl, ellipse, tv);
   rot.add(signGroup);
   // pillar with stacked words (CULTURE / FLOWERS / PEOPLE / HIGHER / TOGETHER)
@@ -72,7 +72,7 @@ export function buildVault({ mobile }) {
   rot.add(words);
 
   // --- Vault door (hinged) -------------------------------------------------------
-  const DOOR_A = -0.2 * Math.PI;
+  const DOOR_A = -0.13 * Math.PI;
   const mount = new THREE.Group();
   mount.rotation.y = DOOR_A;
   rot.add(mount);
@@ -134,7 +134,7 @@ export function buildVault({ mobile }) {
   const cards = [];
   const cardData = [['Ricky', '34', 140], ['Calvin', '81', 220], ['Marshawn', '24', 95], ['Jeeter', '00', 265], ['Game Day', '7', 300]];
   cardData.forEach(([n, num, hue], i) => {
-    const a = 0.12 + i * 0.27;
+    const a = 0.4 + i * 0.24;
     const r = R - 2.2;
     const x = Math.sin(a) * r;
     const z = Math.cos(a) * r;
@@ -211,6 +211,7 @@ export function buildVault({ mobile }) {
       tl?.kill();
       return new Promise((resolve) => {
         tl = gsap.timeline({ onUpdate: onShadowUpdate, onComplete: resolve });
+        if (reducedMotion) tl.timeScale(8);
         tl.to(wheel.rotation, { z: -Math.PI * 3, duration: 1.3, ease: 'power2.inOut' })
           .to(hinge.rotation, { y: -1.95, duration: 1.4, ease: 'power3.inOut' }, '-=0.15')
           .to(recess.material, { emissiveIntensity: 1.4, duration: 1 }, '<0.2')
