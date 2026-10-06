@@ -402,6 +402,13 @@
   max-width: 70px;
   object-fit: contain;
 }
+.jgd-marker.is-left .jgd-marker__label {
+  left: auto;
+  right: 16px;
+  flex-direction: row-reverse;
+  padding: 0 10px 0 14px;
+  transform: translateX(6px);
+}
 .jgd-marker__label i {
   font-style: normal;
   opacity: 0.8;
@@ -419,11 +426,23 @@
   outline: 2px solid #ffd34d;
   outline-offset: 4px;
 }
+@media (max-width: 640px) {
+  .jgd-marker__label {
+    top: 0;
+    height: auto;
+    min-height: 30px;
+    width: max-content;
+    max-width: min(220px, 44vw);
+    padding: 6px 12px 6px 8px;
+    white-space: normal;
+    line-height: 1.2;
+    translate: 0 -50%;
+  }
+}
 @media (pointer: coarse) {
   .jgd-marker .jgd-marker__label {
     opacity: 1;
     transform: none;
-    height: 30px;
     font-size: 12px;
   }
 }
@@ -1030,6 +1049,56 @@
   display: block;
 }
 
+/* logo-only district menu (The Vault is the one text button) */
+.jgd-nav {
+  align-items: center;
+  gap: 4px;
+}
+.jgd-nav__btn--logo {
+  padding: 0 16px;
+  min-height: 46px;
+  min-width: 64px;
+  justify-content: center;
+}
+.jgd-nav__btn--logo img {
+  height: 22px;
+  max-width: 96px;
+  opacity: 0.78;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.jgd-nav__btn--logo img.is-gameday {
+  height: 34px;
+  max-width: 88px;
+}
+.jgd-nav__btn--logo:hover img,
+.jgd-nav__btn.is-active img {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.jgd-nav__btn.is-active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  box-shadow: inset 0 0 0 1.5px #ffd34d, 0 0 18px rgba(255, 211, 77, 0.35);
+}
+.jgd-nav__btn.is-active img {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+.jgd-nav__btn--vault {
+  min-height: 46px;
+  padding: 0 18px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f4e1b8;
+  background: linear-gradient(180deg, rgba(176, 122, 58, 0.45), rgba(110, 74, 36, 0.45));
+  box-shadow: inset 0 0 0 1px rgba(224, 180, 106, 0.6);
+}
+.jgd-nav__btn--vault:hover {
+  background: linear-gradient(180deg, rgba(176, 122, 58, 0.7), rgba(110, 74, 36, 0.7));
+}
+
 /* ---------- Drop content (athlete features, real cards) ---------- */
 .jgd-modal--feature .jgd-athlete {
   display: contents;
@@ -1264,15 +1333,34 @@
   .jgd-scene-title {
     display: none;
   }
-  .jgd-nav__btn {
-    flex-direction: column;
-    gap: 2px;
-    min-height: 48px;
-    padding: 4px 10px;
-    font-size: 10px;
+  .jgd-nav {
+    width: calc(100% - 20px);
+    max-width: none;
+    overflow: visible;
+    padding: 5px;
+    gap: 3px;
   }
-  .jgd-nav__btn img {
-    height: 15px;
+  .jgd-nav__btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 4px;
+    min-height: 46px;
+    justify-content: center;
+  }
+  .jgd-nav__btn--logo img {
+    height: auto;
+    max-height: 18px;
+    max-width: 100%;
+  }
+  .jgd-nav__btn--logo img.is-gameday {
+    max-height: 30px;
+  }
+  .jgd-nav__btn--vault {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    white-space: normal;
+    text-align: center;
   }
   .jgd-brand__tag {
     font-size: 10px;

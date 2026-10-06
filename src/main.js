@@ -164,6 +164,7 @@ function placeMarkers() {
     const off = x < 8 || x > w - 8 || y < 60 || y > h - 70;
     m.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     m.el.classList.toggle('is-off', off);
+    m.el.classList.toggle('is-left', w < 640 ? x > w / 2 : x > w - 230);
   }
 }
 
@@ -369,7 +370,7 @@ function tick() {
   fx.smoke?.update(t, dt);
   fx.beams?.update(t);
   fx.gulls?.update(t, dt);
-  fx.blimp?.update(t, dt);
+  fx.blimp?.update(t, dt, rig.camera);
   if (current.def.fireworks && !modals.isOpen && !reducedMotion && t > nextVolley) {
     nextVolley = t + 3.5 + Math.random() * 3;
     stadiumVolley(current.id === 'stadium' ? 3 : 2);

@@ -66,12 +66,14 @@ export class Blimp {
     // LED screens on both flanks
     this.screenTex = this._marqueeTexture(logoImage);
     this.ledMat = new THREE.ShaderMaterial({
-      uniforms: { uTex: { value: this.screenTex }, uTime: { value: 0 }, uScroll: { value: 0 }, uGrid: { value: new THREE.Vector2(110, 40) } },
-      vertexShader: /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+      uniforms: { uTex: { value: this.screenTex }, uTime: { value: 0 }, uScroll: { value: 0 }, uGrid: { value: new THREE.Vector2(110, 40) }, uFlip: { value: new THREE.Vector2() } },
+      vertexShader: /* glsl */ `varying vec2 vUv0; void main(){ vUv0 = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
       fragmentShader: /* glsl */ `
-        uniform sampler2D uTex; uniform float uTime; uniform float uScroll; uniform vec2 uGrid;
-        varying vec2 vUv;
+        uniform sampler2D uTex; uniform float uTime; uniform float uScroll; uniform vec2 uGrid; uniform vec2 uFlip;
+        varying vec2 vUv0;
         void main(){
+          // uFlip mirrors the content so it always reads left-to-right, upright, from the camera
+          vec2 vUv = mix(vUv0, 1.0 - vUv0, uFlip);
           vec2 cell = floor(vUv * uGrid) / uGrid + 0.5 / uGrid;
           vec2 suv = vec2(cell.x * 0.2 + uScroll, cell.y);
           vec3 c = texture2D(uTex, suv).rgb;
@@ -97,17 +99,33 @@ export class Blimp {
     // remap uv so x runs along the length, y around the girth
     const uv = panelGeo.attributes.uv;
     for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getY(i), uv.getX(i));
-    // the port panel is mounted rotated 180° relative to starboard: flip its uvs
-    const portGeo = panelGeo.clone();
-    const puv = portGeo.attributes.uv;
-    for (let i = 0; i < puv.count; i++) puv.setXY(i, 1 - puv.getX(i), 1 - puv.getY(i));
-    for (const side of [1, -1]) {
-      const p = new THREE.Mesh(side > 0 ? portGeo : panelGeo, this.ledMat);
+    // Local reading axes of the panel: u runs along the hull, v around it.
+    const axis = (attr) => {
+      const lo = new THREE.Vector3();
+      const hi = new THREE.Vector3();
+      let nl = 0;
+      let nh = 0;
+      const pos = panelGeo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const t = attr(i);
+        if (t < 0.1) (lo.add(new THREE.Vector3().fromBufferAttribute(pos, i)), nl++);
+        if (t > 0.9) (hi.add(new THREE.Vector3().fromBufferAttribute(pos, i)), nh++);
+      }
+      return hi.divideScalar(nh).sub(lo.divideScalar(nl)).normalize();
+    };
+    const uDir = axis((i) => uv.getX(i));
+    const vDir = axis((i) => uv.getY(i));
+    this.panels = [1, -1].map((side) => {
+      const mat = this.ledMat.clone();
+      mat.uniforms.uTex.value = this.screenTex;
+      const p = new THREE.Mesh(panelGeo, mat);
       p.rotation.z = side > 0 ? -Math.PI / 2 : Math.PI / 2;
       p.position.z = 0.03;
-      if (side < 0) p.scale.z = -1; // read left-to-right on the far flank too
       body.add(p);
-    }
+      return { mesh: p, mat };
+    });
+    this.uDir = uDir;
+    this.vDir = vDir;
     this.body = body;
     this.path = null;
     this.u = Math.random();
@@ -154,7 +172,8 @@ export class Blimp {
     this.object.scale.setScalar(length);
   }
 
-  update(t, dt) {
+  /** camera is needed so each LED panel can keep its text readable. */
+  update(t, dt, camera) {
     if (!this.path) return;
     const p = this.path;
     this.u = (this.u + dt * 0.018) % 1;
@@ -164,7 +183,19 @@ export class Blimp {
     this.object.position.copy(pos);
     this.object.lookAt(ahead);
     this.body.rotation.z = Math.sin(t * 0.6) * 0.03;
-    this.ledMat.uniforms.uTime.value = t;
-    this.ledMat.uniforms.uScroll.value = (t * 0.05) % 1;
+    if (camera) {
+      this.object.updateMatrixWorld();
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      const u = new THREE.Vector3();
+      const v = new THREE.Vector3();
+      for (const { mesh, mat } of this.panels) {
+        u.copy(this.uDir).transformDirection(mesh.matrixWorld);
+        v.copy(this.vDir).transformDirection(mesh.matrixWorld);
+        mat.uniforms.uFlip.value.set(u.dot(right) < 0 ? 1 : 0, v.dot(up) < 0 ? 1 : 0);
+        mat.uniforms.uTime.value = t;
+        mat.uniforms.uScroll.value = (t * 0.05) % 1;
+      }
+    }
   }
 }
