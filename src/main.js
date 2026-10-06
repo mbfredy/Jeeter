@@ -128,7 +128,7 @@ function stadiumVolley(n = 6) {
 // --- Markers (DOM) ----------------------------------------------------------------
 const markerLayer = $('[data-jgd-markers]');
 let markers = [];
-const logoFor = (brand) => (brand === 'jeeter' ? BASE + ASSETS.logos.jeeter : ASSETS.logos[brand]);
+const logoFor = (brand) => BASE + (ASSETS.logos[brand] || ASSETS.logos.jeeter);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function buildMarkers(view) {
@@ -197,7 +197,7 @@ function pick(e) {
   const r = renderer.domElement.getBoundingClientRect();
   ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   raycaster.setFromCamera(ndc, rig.camera);
-  const hit = raycaster.intersectObject(current.mesh, false)[0];
+  const hit = raycaster.intersectObject(current.pickMesh, false)[0];
   if (!hit) return null;
   return current.hotspotAt(hit.uv.x, 1 - hit.uv.y);
 }

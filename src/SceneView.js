@@ -2,13 +2,14 @@ import * as THREE from 'three';
 
 // World width of every scene plane. Height follows the image aspect.
 export const PLANE_W = 16;
-// How far the nearest (bottom) row of the render is pushed toward the camera.
-// The aerial renders are effectively a tilted ground plane, so depth grows
-// from the horizon (top) to the foreground (bottom); this gives the
-// isometric diorama parallax without warping buildings.
-export const DEPTH = 1.9;
-
-export const depthAt = (v) => Math.pow(THREE.MathUtils.clamp(v, 0, 1), 1.35) * DEPTH;
+// Depth relief in world units: white in <scene>-depth.png sits this far in
+// front of black. Real per-pixel depth (Depth Anything V2) so buildings,
+// palms and terrain separate as the camera tilts.
+export const DEPTH = 3.2;
+// Fallback when a scene has no depth map: tilted ground-plane gradient.
+const gradientDepth = (v) => Math.pow(THREE.MathUtils.clamp(v, 0, 1), 1.35);
+const GRID = 300; // render mesh columns
+const PICK_GRID = 64; // raycast proxy columns
 
 const NEON_COLORS = {
   green: new THREE.Color('#7dff4f'),
@@ -19,13 +20,10 @@ const NEON_COLORS = {
 };
 
 const vertexShader = /* glsl */ `
-  uniform float uDepth;
   varying vec2 vUv;
   void main() {
     vUv = uv;
-    vec3 p = position;
-    p.z += pow(clamp(1.0 - uv.y, 0.0, 1.0), 1.35) * uDepth;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
@@ -139,7 +137,6 @@ export class SceneView {
       uFx: { value: null },
       uTime: { value: 0 },
       uOpacity: { value: 1 },
-      uDepth: { value: DEPTH },
       uHover: { value: new THREE.Vector4(-1, -1, 0.1, 0.1) },
       uHoverAmt: { value: 0 },
       uAccent: { value: new THREE.Color('#ffd27a') },
@@ -163,7 +160,13 @@ export class SceneView {
     if (this.loading) return this.loading;
     const loader = new THREE.TextureLoader();
     const load = (url) => new Promise((res, rej) => loader.load(base + url, res, undefined, rej));
-    this.loading = Promise.all([load(`scenes/${this.id}.webp`), load(`scenes/${this.id}-fx.png`)]).then(([map, fx]) => {
+    const depth = new Promise((res) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = () => res(null);
+      img.src = `${base}scenes/${this.id}-depth.png`;
+    });
+    this.loading = Promise.all([load(`scenes/${this.id}.webp`), load(`scenes/${this.id}-fx.png`), depth]).then(([map, fx, depthImg]) => {
       map.colorSpace = THREE.SRGBColorSpace;
       map.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
       map.generateMipmaps = true;
@@ -173,7 +176,7 @@ export class SceneView {
       this.uniforms.uMap.value = map;
       this.uniforms.uFx.value = fx;
       this.uniforms.uTexel.value.set(1 / fx.image.width, 1 / fx.image.height);
-      const geo = new THREE.PlaneGeometry(this.width, this.height, 1, 120);
+      this._readDepth(depthImg);
       this.material = new THREE.ShaderMaterial({
         uniforms: this.uniforms,
         vertexShader,
@@ -181,9 +184,22 @@ export class SceneView {
         transparent: true,
         depthWrite: true,
       });
-      this.mesh = new THREE.Mesh(geo, this.material);
+      this.mesh = new THREE.Mesh(this._reliefGeometry(GRID), this.material);
       this.mesh.renderOrder = 0;
       this.group.add(this.mesh);
+      // oversized blurred backdrop: edge pixels stretched outward, hides frame edges at full tilt
+      const back = new THREE.Mesh(
+        new THREE.PlaneGeometry(this.width * 1.6, this.height * 1.6),
+        new THREE.MeshBasicMaterial({ map, color: 0xd8d8e0, depthWrite: false }),
+      );
+      const buv = back.geometry.attributes.uv;
+      for (let i = 0; i < buv.count; i++) buv.setXY(i, (buv.getX(i) - 0.5) * 1.6 + 0.5, (buv.getY(i) - 0.5) * 1.6 + 0.5);
+      back.position.z = -0.6;
+      back.renderOrder = -1;
+      this.group.add(back);
+      // coarse invisible copy for cheap pointer picking
+      this.pickMesh = new THREE.Mesh(this._reliefGeometry(PICK_GRID), new THREE.MeshBasicMaterial({ visible: false }));
+      this.group.add(this.pickMesh);
       this.renderer.initTexture?.(map);
       this.ready = true;
       return this;
@@ -191,14 +207,53 @@ export class SceneView {
     return this.loading;
   }
 
-  /** Image-space (top-left origin) → world position on the displaced plane. */
-  toWorld(u, v, lift = 0, target = new THREE.Vector3()) {
-    return target.set((u - 0.5) * this.width, (0.5 - v) * this.height, depthAt(v) + lift);
+  _readDepth(img) {
+    if (!img) {
+      this.depth = null;
+      return;
+    }
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    const px = g.getImageData(0, 0, c.width, c.height).data;
+    const d = new Float32Array(c.width * c.height);
+    for (let i = 0; i < d.length; i++) d[i] = px[i * 4] / 255;
+    this.depth = { w: c.width, h: c.height, d };
   }
 
-  /** World ray hit (uv from three.js, bottom-left origin) → image space. */
-  static toImage(uv) {
-    return { u: uv.x, v: 1 - uv.y };
+  /** 0 (far) … 1 (near) at image coords, bilinear. */
+  sampleDepth(u, v) {
+    const D = this.depth;
+    if (!D) return gradientDepth(v);
+    const x = THREE.MathUtils.clamp(u, 0, 1) * (D.w - 1);
+    const y = THREE.MathUtils.clamp(v, 0, 1) * (D.h - 1);
+    const x0 = Math.floor(x);
+    const y0 = Math.floor(y);
+    const x1 = Math.min(D.w - 1, x0 + 1);
+    const y1 = Math.min(D.h - 1, y0 + 1);
+    const fx = x - x0;
+    const fy = y - y0;
+    const a = D.d[y0 * D.w + x0] * (1 - fx) + D.d[y0 * D.w + x1] * fx;
+    const b = D.d[y1 * D.w + x0] * (1 - fx) + D.d[y1 * D.w + x1] * fx;
+    return a * (1 - fy) + b * fy;
+  }
+
+  _reliefGeometry(cols) {
+    const rows = Math.round(cols / this.aspect);
+    const geo = new THREE.PlaneGeometry(this.width, this.height, cols, rows);
+    const pos = geo.attributes.position;
+    const uv = geo.attributes.uv;
+    for (let i = 0; i < pos.count; i++) pos.setZ(i, this.sampleDepth(uv.getX(i), 1 - uv.getY(i)) * DEPTH);
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    return geo;
+  }
+
+  /** Image-space (top-left origin) → world position on the relief surface. */
+  toWorld(u, v, lift = 0, target = new THREE.Vector3()) {
+    return target.set((u - 0.5) * this.width, (0.5 - v) * this.height, this.sampleDepth(u, v) * DEPTH + lift);
   }
 
   hotspotAt(u, v) {

@@ -13,11 +13,10 @@ export const BRAND = {
 export const ASSETS = {
   logos: {
     jeeter: 'brand/jeeter-logo.svg',
-    highsman:
-      'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16c5dfe0cc409b90ca_highsman.png',
-    dodi: 'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16002e34ad2dd962da_dodi.png',
-    primitiv:
-      'https://cdn.prod.website-files.com/6218d031a773e4387f831730/6a8f4d16cb42fa020a497491_primitiv-p-500.png',
+    // bundled copies of the brand teams' Webflow-hosted logos
+    highsman: 'brand/highsman.png',
+    dodi: 'brand/dodi.png',
+    primitiv: 'brand/primitiv.png',
   },
 };
 

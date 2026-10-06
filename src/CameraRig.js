@@ -3,9 +3,9 @@ import gsap from 'gsap';
 
 const FOV = 24;
 const MAX_ZOOM = 2.4;
-const TILT_YAW = THREE.MathUtils.degToRad(4.5);
-const TILT_PITCH = THREE.MathUtils.degToRad(3);
-const COVER_MARGIN = 0.93; // keep frame edges hidden while tilting
+const TILT_YAW = THREE.MathUtils.degToRad(3.6);
+const TILT_PITCH = THREE.MathUtils.degToRad(2.4);
+const COVER_MARGIN = 0.84; // keep frame edges hidden while tilting
 
 /**
  * Diorama camera over a single photo plane.
@@ -104,7 +104,7 @@ export class CameraRig {
     const v = this._visible(s.zoom);
     const dist = v.h / 2 / Math.tan(THREE.MathUtils.degToRad(FOV / 2));
     // look at a point slightly in front of the plane so parallax pivots on the mid-ground
-    const pivotZ = 0.9;
+    const pivotZ = 1.4; // mid-depth of the relief: near things swing one way, far the other
     const target = new THREE.Vector3(s.x, s.y, pivotZ);
     const offset = new THREE.Vector3(0, 0, dist).applyEuler(new THREE.Euler(-s.pitch, s.yaw, 0, 'YXZ'));
     this.camera.position.copy(target).add(offset);

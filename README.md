@@ -45,6 +45,7 @@ npm run build      # static site in /dist
 | `src/effects/` | Fireworks, smoke, light beams, gulls, LED blimp |
 | `src/ModalManager.js` | Video modal, Highsman and PRIMITIV features, Dodi drawer, Vault locker |
 | `tools/build_assets.py` | Builds `public/scenes/*` from `tools/src-*.webp` |
+| `tools/build_depth.py` | Depth Anything V2 (ONNX) → `public/scenes/*-depth.png` for real per-pixel parallax |
 | `webflow/` | Webflow embed snippets |
 
 ## Updating art
@@ -54,7 +55,10 @@ npm run build      # static site in /dist
 2. Run `pip install opencv-python-headless numpy` once, then `npm run assets`.
    This upscales the render, writes `public/scenes/<scene>.webp`, and writes
    the effect mask `<scene>-fx.png` (R = water, G = waterfall, B = lights/neon).
-3. Adjust hotspot positions in `src/scenes.json` if the composition changed.
+3. Regenerate depth: `pip install onnxruntime huggingface_hub`, download
+   `onnx/model.onnx` from `onnx-community/depth-anything-v2-large`, then
+   `python3 tools/build_depth.py path/to/model.onnx [scene ...]` (~45 s per image on CPU).
+4. Adjust hotspot positions in `src/scenes.json` if the composition changed.
 
 **Full map hub.** Save the full-map render as `tools/src-map.webp` and run
 `npm run assets`. The app detects `public/scenes/map.webp` and starts on the
