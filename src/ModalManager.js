@@ -1,5 +1,5 @@
 import gsap from 'gsap';
-import { ASSETS, CONTENT, DROP, VIDEO } from './config.js';
+import { ASSETS, CONTENT, DROP, VIDEOS } from './config.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const BASE = import.meta.env.BASE_URL;
@@ -44,12 +44,10 @@ export class ModalManager {
       img.src = BASE + ASSETS.logos[img.dataset.jgdLogo];
       img.addEventListener('error', () => img.remove(), { once: true });
     });
-    const vt = this.root.querySelector('[data-jgd-video-title]');
-    if (vt) vt.textContent = VIDEO.title;
 
     this.root.querySelectorAll('[data-jgd-athlete]').forEach((el) => {
       el.innerHTML = this._athleteHTML(CONTENT[el.dataset.jgdAthlete], el.classList.contains('jgd-athlete--drawer'));
-      el.querySelectorAll('[data-jgd-open]').forEach((b) => b.addEventListener('click', () => this.open(b.dataset.jgdOpen)));
+      el.querySelectorAll('[data-jgd-open]').forEach((b) => b.addEventListener('click', () => this.open(b.dataset.jgdOpen, { clip: b.dataset.jgdClip })));
       el.querySelectorAll('.jgd-card').forEach((card) => this._bindCard(card));
     });
 
@@ -78,7 +76,7 @@ export class ModalManager {
     const flavor = a.flavor.map((f) => `<li>${esc(f)}</li>`).join('');
     const ctas = `<div class="jgd-ctas">
         <a class="jgd-btn jgd-btn--solid" href="${DROP.storesUrl}" target="_blank" rel="noopener">Find a store near you</a>
-        <button type="button" class="jgd-btn jgd-btn--ghost" data-jgd-open="video">▶ Watch the Game Day short</button>
+        <button type="button" class="jgd-btn jgd-btn--ghost" data-jgd-open="video" data-jgd-clip="${a.brand}">▶ Watch ${esc(a.athlete.split(' ')[0])}’s short</button>
       </div>`;
     const card = `<div class="jgd-pair">
         <div class="jgd-pair__card">${this._cardHTML(a)}</div>
@@ -128,7 +126,8 @@ export class ModalManager {
   }
 
   // --- open / close ----------------------------------------------------------
-  open(type, { onClose } = {}) {
+  /** clip: key into VIDEOS for the video modal (default: stadium film). */
+  open(type, { onClose, clip = 'stadium' } = {}) {
     if (this.active) this.close({ silent: true });
     const el = this.modals[type];
     if (!el) return;
@@ -138,7 +137,7 @@ export class ModalManager {
     el.hidden = false;
     this.root.classList.add('jgd-has-modal');
 
-    if (type === 'video') this._startVideo();
+    if (type === 'video') this._startVideo(VIDEOS[clip] || VIDEOS.stadium);
 
     const panel = el.querySelector('.jgd-modal__panel');
     const backdrop = el.querySelector('.jgd-modal__backdrop');
@@ -185,32 +184,57 @@ export class ModalManager {
   }
 
   // --- video -------------------------------------------------------------------
-  _startVideo() {
+  _startVideo(video) {
     const el = this.modals.video;
+    el.classList.toggle('is-vertical', !!video.vertical);
+    el.querySelector('[data-jgd-video-title]').textContent = video.title;
     const iframe = el.querySelector('[data-jgd-video]');
     const fallback = el.querySelector('[data-jgd-video-fallback]');
-    const id = VIDEO.youtubeId;
+    const unmute = el.querySelector('[data-jgd-unmute]');
+    const id = video.id;
     const valid = /^[\w-]{11}$/.test(id);
     fallback.hidden = valid;
     iframe.hidden = !valid;
+    el.querySelector('[data-jgd-yt]').href = video.vertical ? `https://www.youtube.com/shorts/${id}` : `https://www.youtube.com/watch?v=${id}${video.start ? `&t=${video.start}s` : ''}`;
     if (!valid) return;
-    const origin = encodeURIComponent(window.location.origin);
-    // Muted autoplay is the only autoplay mobile browsers allow; viewers unmute in the player.
-    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&start=${VIDEO.start || 0}&origin=${origin}`;
-    iframe.title = VIDEO.title;
+    const params = new URLSearchParams({
+      autoplay: '1',
+      mute: '1', // muted autoplay is the only autoplay every browser allows
+      playsinline: '1',
+      rel: '0',
+      enablejsapi: '1',
+      start: String(video.start || 0),
+    });
+    if (video.vertical) {
+      // shorts loop like they do on YouTube
+      params.set('loop', '1');
+      params.set('playlist', id);
+    }
+    // sandboxed / file hosts report origin "null"; YouTube rejects that value
+    if (/^https?:/.test(window.location.origin)) params.set('origin', window.location.origin);
+    iframe.src = `https://www.youtube.com/embed/${id}?${params}`;
+    // Unmute on request (user gesture inside our page drives the player via the IFrame API)
+    unmute.hidden = false;
+    unmute.onclick = () => {
+      this._ytCommand('unMute');
+      this._ytCommand('setVolume', [100]);
+      this._ytCommand('playVideo');
+      unmute.hidden = true;
+    };
+    // handshake so the player starts emitting events and accepts commands
+    iframe.onload = () => iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 'jgd' }), '*');
+  }
+
+  _ytCommand(func, args = []) {
+    const iframe = this.modals.video.querySelector('[data-jgd-video]');
+    iframe.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
   }
 
   _stopVideo() {
-    const iframe = this.modals.video.querySelector('[data-jgd-video]');
-    const cmd = (func) => iframe.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*');
-    try {
-      cmd('mute');
-      cmd('stopVideo');
-    } catch {
-      /* cross-origin player not ready */
-    }
-    // Unloading the iframe guarantees audio stops on every browser.
-    setTimeout(() => iframe.removeAttribute('src'), 320);
+    const el = this.modals.video;
+    el.querySelector('[data-jgd-unmute]').hidden = true;
+    // Unloading the player is the only stop that is instant and reliable everywhere.
+    el.querySelector('[data-jgd-video]').removeAttribute('src');
   }
 
   _trap(e) {

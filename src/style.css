@@ -994,6 +994,42 @@
   place-items: center;
 }
 
+.jgd-modal--video.is-vertical .jgd-modal__panel {
+  width: min(420px, 100%, calc((100dvh - 140px) * 9 / 16));
+}
+.jgd-modal--video.is-vertical .jgd-video {
+  aspect-ratio: 9 / 16;
+}
+.jgd-modal--video.is-vertical .jgd-modal__caption {
+  flex-direction: column;
+  gap: 6px;
+}
+.jgd-unmute {
+  position: absolute;
+  left: 16px;
+  bottom: 60px;
+  z-index: 2;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 0;
+  background: #fff;
+  color: #0d0b1a;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.jgd-yt {
+  flex: 0 0 auto;
+  color: #ffd34d;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+}
+.jgd-modal__caption strong {
+  display: block;
+}
+
 /* ---------- Drop content (athlete features, real cards) ---------- */
 .jgd-modal--feature .jgd-athlete {
   display: contents;

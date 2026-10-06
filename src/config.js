@@ -21,12 +21,20 @@ export const ASSETS = {
 };
 
 // Campaign launch video. Override per page with ?video=<YouTubeID>.
-// Jeeter Game Day 2026 Official Short. Override per page with ?video=<YouTubeID>.
-export const VIDEO = {
-  youtubeId: params.get('video') || '3x26NitaGYg',
-  start: params.get('video') ? 0 : 8,
-  title: 'Jeeter Game Day 2026 Official Short (Feat. Marshawn Lynch, Calvin Johnson & Ricky Williams)',
+// Campaign videos. `vertical` = YouTube Short (9:16 player).
+// The stadium film can be overridden per page with ?video=<YouTubeID>.
+export const VIDEOS = {
+  stadium: {
+    id: params.get('video') || '3x26NitaGYg',
+    start: params.get('video') ? 0 : 8,
+    title: 'Jeeter Game Day 2026 Official Short (Feat. Marshawn Lynch, Calvin Johnson & Ricky Williams)',
+  },
+  highsman: { id: 'sqcfyk0V5Fo', vertical: true, title: 'Ricky Williams · Sticky Ricky · Game Day Kick Off' },
+  primitiv: { id: 'vf8o3mnp-7E', vertical: true, title: 'Calvin Johnson · Megachron · Game Day Kick Off' },
+  dodi: { id: 'Q2wbcMIsc6U', vertical: true, title: 'Marshawn Lynch · Beast Quake · Game Day Kick Off' },
 };
+// back-compat alias for the stadium film
+export const VIDEO = VIDEOS.stadium;
 
 // ---------------------------------------------------------------------------
 // Campaign copy and assets, taken from the live drop page:
