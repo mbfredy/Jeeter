@@ -1,16 +1,17 @@
 import gsap from 'gsap';
-import { ASSETS, CONTENT, VIDEO } from './config.js';
+import { ASSETS, CONTENT, DROP, VIDEO } from './config.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const BASE = import.meta.env.BASE_URL;
 
 /**
  * DOM overlays for every district. One modal open at a time; ESC, backdrop
  * and close buttons dismiss; focus is trapped and restored.
- *  - video:    YouTube embed, autoplays muted; mute + stop + unload on close
- *  - highsman: athlete bio, highlights, soundbite players
- *  - primitiv: formulation tabs with animated terpene bars
- *  - dodi:     slide-out commerce drawer with external checkout links
- *  - vault:    CSS-3D holographic collectible cards (tilt, flip, auto-rotate)
+ *  - video:    Game Day 2026 Official Short (YouTube); stop + unload on close
+ *  - highsman / primitiv: athlete feature (strain, 2G XL vape, collectible card)
+ *  - dodi:     the same feature as a slide-out drawer
+ *  - vault:    the three real collectible cards with holo tilt + flip
+ * All copy comes from config.js (sourced from the live drop page).
  */
 export class ModalManager {
   constructor(root, { reducedMotion = false } = {}) {
@@ -19,7 +20,6 @@ export class ModalManager {
     this.active = null;
     this.onClose = null;
     this.lastFocus = null;
-    this.audio = null;
     this.modals = {};
     root.querySelectorAll('[data-jgd-modal]').forEach((el) => {
       this.modals[el.dataset.jgdModal] = el;
@@ -40,115 +40,70 @@ export class ModalManager {
 
   // --- content -------------------------------------------------------------
   _fill() {
-    const setFields = (el, data) => {
-      el.querySelectorAll('[data-jgd-field]').forEach((f) => {
-        const v = data[f.dataset.jgdField];
-        if (v != null) f.textContent = v;
-      });
-      const cta = el.querySelector('[data-jgd-cta]');
-      if (cta && data.cta) {
-        cta.textContent = data.cta.label;
-        cta.href = data.cta.href;
-      }
-    };
     this.root.querySelectorAll('[data-jgd-logo]').forEach((img) => {
-      const src = ASSETS.logos[img.dataset.jgdLogo];
-      img.src = src;
+      img.src = BASE + ASSETS.logos[img.dataset.jgdLogo];
       img.addEventListener('error', () => img.remove(), { once: true });
     });
+    const vt = this.root.querySelector('[data-jgd-video-title]');
+    if (vt) vt.textContent = VIDEO.title;
 
-    // Highsman
-    const hs = this.modals.highsman;
-    setFields(hs, CONTENT.highsman);
-    hs.querySelector('[data-jgd-highlights]').innerHTML = CONTENT.highsman.highlights
-      .map((h) => `<div class="jgd-stat"><b>${esc(h.stat)}</b><span>${esc(h.label)}</span></div>`)
-      .join('');
-    const sb = hs.querySelector('[data-jgd-soundbites]');
-    sb.innerHTML = CONTENT.highsman.soundbites
-      .map(
-        (s, i) => `<li><button type="button" class="jgd-sound__btn" data-i="${i}" ${s.src ? '' : 'disabled'} aria-label="Play ${esc(s.title)}">
-          <span class="jgd-sound__icon" aria-hidden="true"></span></button>
-          <div class="jgd-sound__meta"><b>${esc(s.title)}</b><span>${s.src ? 'Tap to play' : 'Dropping on game day'}</span></div>
-          <div class="jgd-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div></li>`,
-      )
-      .join('');
-    sb.querySelectorAll('.jgd-sound__btn').forEach((b) => b.addEventListener('click', () => this._toggleSound(b)));
+    this.root.querySelectorAll('[data-jgd-athlete]').forEach((el) => {
+      el.innerHTML = this._athleteHTML(CONTENT[el.dataset.jgdAthlete], el.classList.contains('jgd-athlete--drawer'));
+      el.querySelectorAll('[data-jgd-open]').forEach((b) => b.addEventListener('click', () => this.open(b.dataset.jgdOpen)));
+      el.querySelectorAll('.jgd-card').forEach((card) => this._bindCard(card));
+    });
 
-    // PRIMITIV
-    const pr = this.modals.primitiv;
-    setFields(pr, CONTENT.primitiv);
-    const tabs = pr.querySelector('[data-jgd-tabs]');
-    tabs.innerHTML = CONTENT.primitiv.formulations
-      .map((f, i) => `<button type="button" role="tab" class="jgd-tab" data-i="${i}" aria-selected="${i === 0}">${esc(f.name)}</button>`)
-      .join('');
-    tabs.querySelectorAll('.jgd-tab').forEach((t) => t.addEventListener('click', () => this._formulation(+t.dataset.i)));
-
-    // Dodi
-    const dd = this.modals.dodi;
-    setFields(dd, CONTENT.dodi);
-    dd.querySelector('[data-jgd-products]').innerHTML = CONTENT.dodi.products
-      .map(
-        (p) => `<article class="jgd-product" style="--h:${p.hue}">
-          <div class="jgd-product__art"><img src="${esc(ASSETS.logos.dodi)}" alt="" loading="lazy" onerror="this.remove()"><span>${esc(p.meta)}</span></div>
-          <div class="jgd-product__info"><h4>${esc(p.name)}</h4><div class="jgd-product__row"><b>${esc(p.price)}</b>
-          <a class="jgd-btn jgd-btn--neon" href="${esc(p.href)}" target="_blank" rel="noopener">Shop now</a></div></div>
-        </article>`,
-      )
-      .join('');
-
-    // Vault
-    const vt = this.modals.vault;
-    setFields(vt, CONTENT.vault);
-    const cards = vt.querySelector('[data-jgd-cards]');
-    cards.innerHTML = CONTENT.vault.cards
-      .map(
-        (c, i) => `<div class="jgd-card-wrap" style="--i:${i}"><button type="button" class="jgd-card" style="--h:${c.hue}" aria-label="${esc(c.name)} collectible card, tap to flip">
-          <div class="jgd-card__face jgd-card__front">
-            <span class="jgd-card__brand">${esc(c.brand)}</span>
-            <span class="jgd-card__num">${esc(c.number)}</span>
-            <span class="jgd-card__name">${esc(c.name)}</span>
-            <span class="jgd-card__rarity">${esc(c.rarity)}</span>
-            <span class="jgd-card__holo"></span><span class="jgd-card__glare"></span>
-          </div>
-          <div class="jgd-card__face jgd-card__back"><span class="jgd-wordmark">Jeeter</span><span>THE VAULT · ${String(i + 1).padStart(2, '0')}/${CONTENT.vault.cards.length}</span><span class="jgd-card__holo"></span></div>
-        </button></div>`,
-      )
-      .join('');
+    // Vault: the real collectible cards
+    const v = CONTENT.vault;
+    const vault = this.modals.vault;
+    vault.querySelector('[data-jgd-field="kicker"]').textContent = v.kicker;
+    vault.querySelector('[data-jgd-field="title"]').textContent = v.title;
+    vault.querySelector('[data-jgd-field="subtitle"]').textContent = v.subtitle;
+    const cards = vault.querySelector('[data-jgd-cards]');
+    cards.innerHTML =
+      v.cards.map((id, i) => `<div class="jgd-card-wrap" style="--i:${i}">${this._cardHTML(CONTENT[id])}<span class="jgd-card-wrap__name">${esc(CONTENT[id].athlete)}</span></div>`).join('') +
+      `<p class="jgd-locker__foot">${esc(v.footer)} <span>${esc(v.hint)}</span></p>`;
     cards.querySelectorAll('.jgd-card').forEach((card) => this._bindCard(card));
   }
 
-  _formulation(i) {
-    const pr = this.modals.primitiv;
-    const f = CONTENT.primitiv.formulations[i];
-    pr.querySelectorAll('.jgd-tab').forEach((t) => t.setAttribute('aria-selected', String(+t.dataset.i === i)));
-    pr.querySelector('[data-jgd-mood]').innerHTML = `<b>${esc(f.name)}</b><span>${esc(f.mood)}</span>`;
-    const bars = pr.querySelector('[data-jgd-bars]');
-    bars.innerHTML = Object.entries(f.terpenes)
-      .map(([k, v]) => `<div class="jgd-bar"><span>${esc(k)}</span><div class="jgd-bar__track"><i data-v="${v}"></i></div><em>${v}</em></div>`)
-      .join('');
-    bars.querySelectorAll('i').forEach((el, n) => {
-      gsap.fromTo(el, { width: '0%' }, { width: `${el.dataset.v}%`, duration: this.reducedMotion ? 0 : 0.9, delay: n * 0.08, ease: 'power3.out' });
-    });
+  _cardHTML(a) {
+    return `<button type="button" class="jgd-card" aria-label="${esc(a.athlete)} collectible card, tap to flip">
+      <div class="jgd-card__face jgd-card__front"><img src="${BASE + a.card}" alt="${esc(a.athlete)} Game Day Kick Off collectible card" loading="lazy" draggable="false" /><span class="jgd-card__holo"></span><span class="jgd-card__glare"></span></div>
+      <div class="jgd-card__face jgd-card__back"><img src="${BASE}brand/jeeter-logo.svg" alt="" /><span>JEETER COLLECTOR SERIES</span><small>${esc(a.athlete)} · ${esc(a.strain)}</small><span class="jgd-card__holo"></span></div>
+    </button>`;
   }
 
-  _toggleSound(btn) {
-    const s = CONTENT.highsman.soundbites[+btn.dataset.i];
-    const li = btn.closest('li');
-    const wasPlaying = li.classList.contains('is-playing');
-    this._stopSound();
-    if (wasPlaying || !s.src) return;
-    this.audio = new Audio(s.src);
-    this.audio.addEventListener('ended', () => this._stopSound());
-    this.audio.play().catch(() => this._stopSound());
-    li.classList.add('is-playing');
-  }
-
-  _stopSound() {
-    if (this.audio) {
-      this.audio.pause();
-      this.audio = null;
+  _athleteHTML(a, drawer) {
+    const tags = [a.type, a.format, '1G All-in-One · CA exclusive'].map((t) => `<li>${esc(t)}</li>`).join('');
+    const flavor = a.flavor.map((f) => `<li>${esc(f)}</li>`).join('');
+    const ctas = `<div class="jgd-ctas">
+        <a class="jgd-btn jgd-btn--solid" href="${DROP.storesUrl}" target="_blank" rel="noopener">Find a store near you</a>
+        <button type="button" class="jgd-btn jgd-btn--ghost" data-jgd-open="video">▶ Watch the Game Day short</button>
+      </div>`;
+    const card = `<div class="jgd-pair">
+        <div class="jgd-pair__card">${this._cardHTML(a)}</div>
+        <div class="jgd-pair__text"><span class="jgd-kicker">Collectible card</span><b>Pairs with the ${esc(a.athlete)} Collectible Card</b>
+        <p>Scan to unlock it in the Jeeter Collector Series.</p>
+        <button type="button" class="jgd-link" data-jgd-open="vault">See all three cards →</button></div>
+      </div>`;
+    const head = `<img class="jgd-feature__logo" src="${BASE + ASSETS.logos[a.brand]}" alt="" />
+        <span class="jgd-kicker">${esc(a.athlete)} · ${esc(a.badge)}</span>
+        <h2>${esc(a.strain)} <small>(${esc(a.type[0])})</small></h2>
+        <ul class="jgd-tags">${tags}</ul>`;
+    if (drawer) {
+      return `<div class="jgd-drawer__head">${head}</div>
+        <div class="jgd-drawer__product"><img src="${BASE + a.product}" alt="${esc(a.strain)} ${esc(a.format)}" /></div>
+        <p class="jgd-copy">${esc(a.copy)}</p>
+        <ul class="jgd-flavor">${flavor}</ul>
+        ${card}${ctas}`;
     }
-    this.modals.highsman.querySelectorAll('li.is-playing').forEach((l) => l.classList.remove('is-playing'));
+    return `<div class="jgd-feature__hero"><img class="jgd-feature__product" src="${BASE + a.product}" alt="${esc(a.strain)} ${esc(a.format)}" /></div>
+      <div class="jgd-feature__body">
+        ${head}
+        <p class="jgd-copy">${esc(a.copy)}</p>
+        <ul class="jgd-flavor">${flavor}</ul>
+        ${card}${ctas}
+      </div>`;
   }
 
   // Pointer tilt + holographic sheen driven by CSS variables.
@@ -184,7 +139,6 @@ export class ModalManager {
     this.root.classList.add('jgd-has-modal');
 
     if (type === 'video') this._startVideo();
-    if (type === 'primitiv') this._formulation(0);
 
     const panel = el.querySelector('.jgd-modal__panel');
     const backdrop = el.querySelector('.jgd-modal__backdrop');
@@ -208,7 +162,6 @@ export class ModalManager {
     const el = this.modals[type];
     this.active = null;
     if (type === 'video') this._stopVideo();
-    if (type === 'highsman') this._stopSound();
 
     const panel = el.querySelector('.jgd-modal__panel');
     const backdrop = el.querySelector('.jgd-modal__backdrop');
@@ -243,7 +196,8 @@ export class ModalManager {
     if (!valid) return;
     const origin = encodeURIComponent(window.location.origin);
     // Muted autoplay is the only autoplay mobile browsers allow; viewers unmute in the player.
-    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${origin}`;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&start=${VIDEO.start || 0}&origin=${origin}`;
+    iframe.title = VIDEO.title;
   }
 
   _stopVideo() {

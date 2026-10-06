@@ -66,14 +66,20 @@ map, with hotspots that dive into each district (already defined in
 `scenes.json`) and a "Full map" button in the HUD. The static blimp in the map
 art is painted out at build time and replaced by the animated one.
 
-## Content to supply
+## Content
 
-All in `src/config.js`:
+All copy, product shots and the three collectible cards come from the live drop
+page (https://www.jeeter.com/boutique-drop/gd-kick-off) and live in
+`src/config.js` and `public/drop/`:
 
-- `VIDEO.youtubeId`: the launch video. `?video=<id>` also works.
-- Highsman soundbite audio URLs.
-- Dodi product names, prices and checkout links (currently placeholders).
-- PRIMITIV formulation data and CTA links.
+- Stadium: Jeeter Game Day 2026 Official Short (YouTube `3x26NitaGYg`).
+- Highsman: Ricky Williams, Sticky Ricky (I).
+- PRIMITIV: Calvin Johnson, Megachron (I).
+- Dodi: Marshawn Lynch, Beast Quake (I).
+  Each athlete has the 2G XL All-in-One plus the CA-exclusive 1G.
+- The Vault: the three collectible cards (Jeeter Collector Series).
+
+"Find a store" links to the drop page's store list.
 
 ## URL parameters and iframe API
 

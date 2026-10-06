@@ -994,6 +994,210 @@
   place-items: center;
 }
 
+/* ---------- Drop content (athlete features, real cards) ---------- */
+.jgd-modal--feature .jgd-athlete {
+  display: contents;
+}
+.jgd-modal--vault h2 {
+  font-size: clamp(24px, 3.4vw, 38px);
+}
+.jgd-theme-dodi {
+  --hero: radial-gradient(120% 80% at 20% 0%, #3a3d44 0%, #15171b 60%, #08090b 100%);
+}
+.jgd-feature__hero {
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+.jgd-feature__product {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.55));
+}
+.jgd-feature__body .jgd-feature__logo,
+.jgd-drawer__head .jgd-feature__logo {
+  display: block;
+  max-height: 44px;
+  max-width: 170px;
+  margin: 0 0 14px;
+}
+.jgd-modal h2 small {
+  font-size: 0.5em;
+  opacity: 0.6;
+}
+.jgd-tags,
+.jgd-flavor {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.jgd-tags li {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--jgd-line);
+}
+.jgd-tags li:first-child {
+  background: #ffd34d;
+  color: #1a1206;
+  border-color: transparent;
+}
+.jgd-copy {
+  margin-top: 16px !important;
+}
+.jgd-flavor li {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.jgd-flavor li:not(:last-child)::after {
+  content: '·';
+  margin-left: 6px;
+  opacity: 0.5;
+}
+.jgd-pair {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-top: 22px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--jgd-line);
+}
+.jgd-pair__card {
+  aspect-ratio: 5 / 7;
+  perspective: 600px;
+}
+.jgd-pair__card .jgd-card {
+  animation: none;
+}
+.jgd-pair__text b {
+  display: block;
+  font-size: 14px;
+  margin: 4px 0;
+}
+.jgd-pair__text p {
+  font-size: 12px !important;
+}
+.jgd-link {
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd34d;
+  cursor: pointer;
+}
+.jgd-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.jgd-ctas .jgd-btn {
+  margin-top: 0;
+  font-size: 13px;
+}
+.jgd-drawer__product {
+  margin: 16px 0 0;
+  border-radius: 16px;
+  background: var(--hero);
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+.jgd-drawer__product img {
+  width: 70%;
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
+}
+.jgd-drawer {
+  overflow-y: auto;
+}
+
+/* real collectible cards */
+.jgd-locker {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 900px;
+  margin: 0 auto;
+}
+.jgd-card-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  aspect-ratio: auto;
+}
+.jgd-card-wrap .jgd-card {
+  aspect-ratio: 5 / 7;
+  height: auto;
+}
+.jgd-card-wrap__name {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f4e1b8;
+}
+.jgd-card__face {
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(224, 180, 106, 0.4);
+}
+.jgd-card__front img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+.jgd-card__holo {
+  opacity: 0.32;
+}
+.jgd-card__back {
+  padding: 18px;
+  background: radial-gradient(circle at 50% 35%, #3b2486, #120c2c 70%);
+  border: 2px solid #c9a25a;
+  text-align: center;
+  color: #f4e1b8;
+}
+.jgd-card__back img {
+  width: 70%;
+  height: auto;
+}
+.jgd-card__back small {
+  font-size: 10px;
+  opacity: 0.7;
+  letter-spacing: 0.1em;
+}
+.jgd-locker__foot {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #f4e1b8;
+  font-weight: 700;
+  margin-top: 8px !important;
+}
+.jgd-locker__foot span {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .jgd-modal--feature .jgd-modal__panel {
@@ -1007,7 +1211,14 @@
     padding: 22px;
   }
   .jgd-locker {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .jgd-feature__hero {
+    min-height: 0;
+  }
+  .jgd-feature__product {
+    max-width: 220px;
   }
 }
 @media (max-width: 640px) {

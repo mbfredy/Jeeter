@@ -33,7 +33,7 @@
       "fireworks": [0.6, 0.03, 0.96, 0.1],
       "beams": [[0.2, 0.34], [0.33, 0.2], [0.66, 0.2], [0.77, 0.33]],
       "hotspots": [
-        { "action": "open:stadium", "label": "Play the Kickoff film", "brand": "jeeter", "c": [0.48, 0.4], "r": [0.27, 0.3], "primary": true },
+        { "action": "open:stadium", "label": "Watch the Game Day short", "brand": "jeeter", "c": [0.48, 0.4], "r": [0.27, 0.3], "primary": true },
         { "action": "goto:primitiv", "label": "PRIMITIV", "brand": "primitiv", "c": [0.115, 0.21], "r": [0.075, 0.06] },
         { "action": "goto:highsman", "label": "Highsman", "brand": "highsman", "c": [0.08, 0.88], "r": [0.075, 0.07] },
         { "action": "goto:dodi", "label": "Dodi", "brand": "dodi", "c": [0.94, 0.43], "r": [0.055, 0.06] }
@@ -50,7 +50,7 @@
       "smoke": [[0.405, 0.128, 0.45]],
       "blimp": { "y": 0.1, "x0": 0.55, "x1": 0.95, "scale": 0.09 },
       "hotspots": [
-        { "action": "open:highsman", "label": "Enter the Highsman Lodge", "brand": "highsman", "c": [0.35, 0.26], "r": [0.17, 0.15], "primary": true },
+        { "action": "open:highsman", "label": "Sticky Ricky · Ricky Williams", "brand": "highsman", "c": [0.35, 0.26], "r": [0.17, 0.15], "primary": true },
         { "action": "open:highsman", "label": "Highsman", "brand": "highsman", "c": [0.42, 0.44], "r": [0.075, 0.045], "marker": false },
         { "action": "open:highsman", "label": "34 Pavilion", "brand": "highsman", "c": [0.65, 0.52], "r": [0.1, 0.1] },
         { "action": "goto:stadium", "label": "Game Day Stadium", "brand": "jeeter", "c": [0.86, 0.33], "r": [0.13, 0.12] }
@@ -67,9 +67,9 @@
       "smoke": [[0.122, 0.064, 1.0], [0.527, 0.162, 0.8], [0.905, 0.705, 0.45], [0.27, 0.105, 0.35]],
       "blimp": { "y": 0.1, "x0": 0.2, "x1": 0.7, "scale": 0.09 },
       "hotspots": [
-        { "action": "open:primitiv", "label": "Botanical Lab & Formulations", "brand": "primitiv", "c": [0.31, 0.34], "r": [0.2, 0.22], "m": [0.3, 0.19], "primary": true },
+        { "action": "open:primitiv", "label": "Megachron · Calvin Johnson", "brand": "primitiv", "c": [0.31, 0.34], "r": [0.2, 0.22], "m": [0.3, 0.19], "primary": true },
         { "action": "open:primitiv", "label": "81 Hall of Fame", "brand": "primitiv", "c": [0.5, 0.5], "r": [0.07, 0.13], "fx": "rings" },
-        { "action": "open:primitiv", "label": "PRIMITIV Lab", "brand": "primitiv", "c": [0.78, 0.45], "r": [0.17, 0.2] },
+        { "action": "open:primitiv", "label": "PRIMITIV · Megachron", "brand": "primitiv", "c": [0.78, 0.45], "r": [0.17, 0.2] },
         { "action": "goto:stadium", "label": "Game Day Stadium", "brand": "jeeter", "c": [0.88, 0.12], "r": [0.12, 0.1] }
       ]
     },
@@ -84,7 +84,7 @@
       "smoke": [],
       "blimp": { "y": 0.13, "x0": 0.42, "x1": 0.95, "scale": 0.09 },
       "hotspots": [
-        { "action": "open:dodi", "label": "Shop the Beast Mode store", "brand": "dodi", "c": [0.38, 0.44], "r": [0.14, 0.2], "m": [0.31, 0.5], "primary": true },
+        { "action": "open:dodi", "label": "Beast Quake · Marshawn Lynch", "brand": "dodi", "c": [0.38, 0.44], "r": [0.14, 0.2], "m": [0.31, 0.5], "primary": true },
         { "action": "open:dodi", "label": "Beast Quake", "brand": "dodi", "c": [0.84, 0.52], "r": [0.08, 0.08], "m": [0.81, 0.455], "fx": "neon" },
         { "action": "open:dodi", "label": "#24 Beast Mode", "brand": "dodi", "c": [0.52, 0.45], "r": [0.05, 0.1], "m": [0.5, 0.56] },
         { "action": "goto:stadium", "label": "Game Day Stadium", "brand": "jeeter", "c": [0.14, 0.1], "r": [0.14, 0.09] }
@@ -103,7 +103,7 @@
       "door": [0.385, 0.54],
       "hotspots": [
         { "action": "open:vault", "label": "Open The Vault", "brand": "jeeter", "c": [0.385, 0.54], "r": [0.06, 0.13], "primary": true, "fx": "door" },
-        { "action": "open:vault", "label": "Collectible Locker", "brand": "jeeter", "c": [0.6, 0.48], "r": [0.2, 0.22] },
+        { "action": "open:vault", "label": "Collectible cards", "brand": "jeeter", "c": [0.6, 0.48], "r": [0.2, 0.22] },
         { "action": "goto:stadium", "label": "Game Day Stadium", "brand": "jeeter", "c": [0.18, 0.08], "r": [0.18, 0.08] }
       ]
     }

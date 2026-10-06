@@ -21,77 +21,74 @@ export const ASSETS = {
 };
 
 // Campaign launch video. Override per page with ?video=<YouTubeID>.
+// Jeeter Game Day 2026 Official Short. Override per page with ?video=<YouTubeID>.
 export const VIDEO = {
-  youtubeId: params.get('video') || 'REPLACE_WITH_YOUTUBE_ID',
+  youtubeId: params.get('video') || '3x26NitaGYg',
+  start: params.get('video') ? 0 : 8,
+  title: 'Jeeter Game Day 2026 Official Short (Feat. Marshawn Lynch, Calvin Johnson & Ricky Williams)',
 };
 
 // ---------------------------------------------------------------------------
-// Editable modal copy. Product names, prices and links are placeholders until
-// the brand teams supply final data.
+// Campaign copy and assets, taken from the live drop page:
+// https://www.jeeter.com/boutique-drop/gd-kick-off
 // ---------------------------------------------------------------------------
+export const DROP = {
+  url: 'https://www.jeeter.com/boutique-drop/gd-kick-off',
+  storesUrl: 'https://www.jeeter.com/boutique-drop/gd-kick-off',
+  title: 'Jeeter Game Day Kick Off',
+  tagline: 'The Season Starts Here',
+  logo: 'drop/game-day-logo.svg',
+  oneG: {
+    label: '1G All-in-One Vapes',
+    badge: 'California exclusive',
+    headline: 'Three players. Three strains. One California-exclusive lineup.',
+    copy: 'Game Day Kick Off brings Ricky Williams, Marshawn Lynch and Calvin Johnson’s signature strains to the 1G All-In-One. Featuring Sticky Ricky, Beast Quake and Megachron, each device pairs bold flavor with upgraded performance built to go from kickoff to the final whistle.',
+    image: 'drop/1g-vapes.webp',
+  },
+};
+
+const ATHLETE_BASE = { format: '2G XL All-in-One Vape', badge: 'New' };
+
 export const CONTENT = {
   highsman: {
-    kicker: 'Highsman District',
-    title: 'Ricky Williams',
-    subtitle: 'Heisman winner. Founder of Highsman.',
-    bio: 'Ricky Williams turned the Heisman pose into a brand built around balance: train hard, recover harder. The Highsman lodge is his retreat on the hill: timber, water and fire, a place to slow the game down.',
-    highlights: [
-      { stat: '34', label: 'The number on the pavilion track' },
-      { stat: 'Lodge', label: 'Fire pits, greenhouse, cold plunge falls' },
-      { stat: 'Ritual', label: 'Stretch, breathe, recover, repeat' },
-    ],
-    // Supply hosted MP3/M4A URLs. Empty src renders a "dropping soon" state.
-    soundbites: [
-      { title: 'On recovery', src: '' },
-      { title: 'On the Heisman pose', src: '' },
-      { title: 'Game day ritual', src: '' },
-    ],
-    cta: { label: 'Shop Highsman', href: '#' },
+    ...ATHLETE_BASE,
+    brand: 'highsman',
+    athlete: 'Ricky Williams',
+    strain: 'Sticky Ricky',
+    type: 'Indica',
+    copy: 'Sticky Ricky brings sweet mango up front, layered with earthy funk and a touch of spicy pine. Tropical and bold with a savory edge that keeps the profile balanced. Ricky Williams’ signature strain returns for another season, bringing a familiar favorite back to Game Day. Built to pair with the Ricky Williams Collectible Card and complete the Game Day Kick Off collection.',
+    flavor: ['Sweet mango', 'Earthy funk', 'Spicy pine'],
+    product: 'drop/2g-highsman.webp',
+    card: 'drop/card-highsman.webp',
   },
   primitiv: {
-    kicker: 'PRIMITIV District',
-    title: 'Botanical Lab & Formulations',
-    subtitle: 'Calvin "Megatron" Johnson · Motor City Works',
-    intro: 'Detroit-built and lab-led. Pick a formulation to see its terpene profile.',
-    formulations: [
-      {
-        name: 'Kickoff',
-        mood: 'Bright · Social',
-        terpenes: { Limonene: 82, Pinene: 46, Caryophyllene: 38, Myrcene: 22 },
-      },
-      {
-        name: 'Two-Minute Drill',
-        mood: 'Focused · Clear',
-        terpenes: { Pinene: 78, Terpinolene: 55, Limonene: 40, Linalool: 18 },
-      },
-      {
-        name: 'Overtime',
-        mood: 'Calm · Heavy',
-        terpenes: { Myrcene: 88, Linalool: 52, Caryophyllene: 44, Humulene: 20 },
-      },
-    ],
-    cta: { label: 'Explore PRIMITIV', href: '#' },
+    ...ATHLETE_BASE,
+    brand: 'primitiv',
+    athlete: 'Calvin Johnson',
+    strain: 'Megachron',
+    type: 'Indica',
+    copy: 'Megachron leads with sweet berry flavor backed by earthy undertones for a smooth, balanced profile. Inspired by Calvin Johnson and built around the larger-than-life legacy behind Megatron. Built to pair with the Calvin Johnson Collectible Card and complete the Game Day Kick Off collection.',
+    flavor: ['Sweet berry', 'Earthy undertones'],
+    product: 'drop/2g-primitiv.webp',
+    card: 'drop/card-primitiv.webp',
   },
   dodi: {
-    kicker: 'Dodi District',
-    title: 'Beast Mode Shop',
-    subtitle: 'Marshawn Lynch · Oakland',
-    products: [
-      { name: 'Beast Quake Pre-Roll Pack', meta: '5 × 0.5g', price: '$30', href: '#', hue: 110 },
-      { name: '#24 Infused Blunt', meta: '1.5g', price: '$22', href: '#', hue: 140 },
-      { name: 'Oakland Gold Flower', meta: '3.5g', price: '$45', href: '#', hue: 45 },
-      { name: 'Skittles Run Gummies', meta: '10 pc', price: '$20', href: '#', hue: 300 },
-    ],
+    ...ATHLETE_BASE,
+    brand: 'dodi',
+    athlete: 'Marshawn Lynch',
+    strain: 'Beast Quake',
+    type: 'Indica',
+    copy: 'Beast Quake hits with bold berry and sweet blue raspberry, rounded out by earthy undertones for a smooth, full-flavored finish. Inspired by Marshawn Lynch’s legendary 67-yard run and one of football’s most unforgettable moments. Built to pair with the Marshawn Lynch Collectible Card and complete the Game Day Kick Off collection.',
+    flavor: ['Bold berry', 'Sweet blue raspberry', 'Earthy undertones'],
+    product: 'drop/2g-dodi.webp',
+    card: 'drop/card-dodi.webp',
   },
   vault: {
-    kicker: 'The Vault',
-    title: 'Collectible Locker',
-    subtitle: 'Drag or hover a card to tilt it. Tap to flip.',
-    cards: [
-      { brand: 'Jeeter', name: 'Game Day', number: '00', rarity: 'Genesis', hue: 265 },
-      { brand: 'Highsman', name: 'Ricky Williams', number: '34', rarity: 'Legendary', hue: 140 },
-      { brand: 'PRIMITIV', name: 'Calvin Johnson', number: '81', rarity: 'Hall of Fame', hue: 220 },
-      { brand: 'Dodi', name: 'Marshawn Lynch', number: '24', rarity: 'Beast Mode', hue: 95 },
-    ],
+    kicker: 'Collect ’em all',
+    title: 'Three players. Three cards. One collection.',
+    subtitle: 'Each Game Day Kick Off collectible unlocks a digital card inside the Jeeter Collector Series. Scan, collect, and complete the full lineup featuring Calvin Johnson, Marshawn Lynch, and Ricky Williams.',
+    footer: 'Collect all three to complete the set.',
+    hint: 'Hover or drag to tilt · Tap to flip',
+    cards: ['primitiv', 'dodi', 'highsman'],
   },
 };
