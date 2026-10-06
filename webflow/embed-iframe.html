@@ -1,0 +1,56 @@
+<!--
+  OPTION A (recommended): iframe embed
+  ------------------------------------
+  1. Deploy `npm run build` output (the /dist folder) to any static host
+     (Netlify, Vercel, Cloudflare Pages, S3). Replace APP_URL below.
+  2. In Webflow add a Section → set it to 100vw × 100vh (or w-full h-screen),
+     drop an "Embed" element inside it and paste everything below.
+  Deep links:  APP_URL/?zone=dodi   (stadium | highsman | primitiv | dodi | vault)
+  Campaign video override:  APP_URL/?video=<YouTubeID>
+-->
+<style>
+  .jgd-embed {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 560px;
+    overflow: hidden;
+    background: #120c2c;
+  }
+  .jgd-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  /* Webflow wraps embeds in .w-embed; stop it from adding line-height gaps */
+  .w-embed:has(.jgd-embed) { line-height: 0; }
+</style>
+<div class="jgd-embed">
+  <iframe
+    id="jgd-frame"
+    src="https://APP_URL/"
+    title="Jeeter Game Day Kickoff – interactive world"
+    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+    allowfullscreen
+    loading="lazy"
+  ></iframe>
+</div>
+<script>
+  // Optional: drive the world from Webflow buttons, e.g. <a data-jgd-zone="vault">
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-jgd-zone]');
+    if (!t) return;
+    e.preventDefault();
+    document.getElementById('jgd-frame').contentWindow.postMessage({ type: 'jgd:zone', zone: t.getAttribute('data-jgd-zone') }, '*');
+  });
+  // Optional analytics hook: the world reports every district opened.
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'jgd:district' && window.dataLayer) {
+      window.dataLayer.push({ event: 'jgd_district_open', district: e.data.id });
+    }
+  });
+</script>

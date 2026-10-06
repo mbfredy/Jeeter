@@ -1,0 +1,29 @@
+<!--
+  OPTION B: direct script embed (no iframe)
+  -----------------------------------------
+  Use when the world must share the page's scroll/analytics context.
+  1. Deploy /dist to a static host (APP_URL). Note the hashed file names in
+     dist/assets (index-XXXX.js, index-XXXX.css). Every build changes them,
+     so update this snippet after each deploy (or keep Option A).
+  2. Page Settings → Custom Code → Head: paste the <link> tags.
+  3. Add an Embed element where the world should appear and paste the
+     <div id="jgd-app" class="jgd"> … </div> block copied verbatim from
+     dist/index.html, followed by the <script> tag below.
+  All CSS is scoped to .jgd / .jgd-* and never touches Webflow classes.
+  Cross-origin module scripts need CORS: the included public/_headers file
+  sets Access-Control-Allow-Origin for Netlify / Cloudflare Pages.
+-->
+
+<!-- HEAD -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600&family=Inter:wght@400;600;800&family=Yellowtail&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://APP_URL/assets/index-XXXX.css" />
+
+<!-- BODY (Embed element) -->
+<style>
+  /* Size the mount like a full-screen Webflow section */
+  #jgd-app.jgd { width: 100%; height: 100vh; height: 100dvh; min-height: 560px; }
+</style>
+<!-- paste the #jgd-app markup from dist/index.html here -->
+<script type="module" crossorigin src="https://APP_URL/assets/index-XXXX.js"></script>

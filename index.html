@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#120c2c" />
+    <title>Jeeter · Game Day Kickoff</title>
+    <meta name="description" content="Explore the Jeeter Game Day Kickoff world: the stadium, Highsman, PRIMITIV, Dodi and The Vault." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.prod.website-files.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600&family=Inter:wght@400;600;800&family=Yellowtail&display=swap" rel="stylesheet" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #120c2c;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Mount point. Everything is scoped inside #jgd-app / .jgd so the same
+         markup can be pasted into a Webflow Embed without style collisions. -->
+    <div id="jgd-app" class="jgd">
+      <div class="jgd-canvas" data-jgd-canvas></div>
+
+      <!-- Preloader -->
+      <div class="jgd-preloader" data-jgd-preloader>
+        <div class="jgd-preloader__inner">
+          <div class="jgd-wordmark jgd-wordmark--xl">Jeeter</div>
+          <div class="jgd-preloader__tag">GAME DAY KICKOFF</div>
+          <div class="jgd-preloader__bar"><span data-jgd-progress></span></div>
+          <div class="jgd-preloader__pct" data-jgd-pct>0%</div>
+        </div>
+      </div>
+
+      <!-- HUD -->
+      <header class="jgd-hud-top">
+        <div class="jgd-brand">
+          <span class="jgd-wordmark">Jeeter</span>
+          <span class="jgd-brand__tag">GAME DAY<br />KICKOFF</span>
+        </div>
+        <button class="jgd-btn jgd-btn--ghost" type="button" data-jgd-overview aria-label="Back to overview">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3 2 11h3v9h6v-6h2v6h6v-9h3z" /></svg>
+          <span>Overview</span>
+        </button>
+      </header>
+
+      <nav class="jgd-nav" aria-label="Districts" data-jgd-nav>
+        <button type="button" class="jgd-nav__btn" data-jgd-zone="stadium"><i style="--c:#5b7cff"></i>Stadium</button>
+        <button type="button" class="jgd-nav__btn" data-jgd-zone="highsman"><i style="--c:#3fa46a"></i>Highsman</button>
+        <button type="button" class="jgd-nav__btn" data-jgd-zone="primitiv"><i style="--c:#2f6bff"></i>PRIMITIV</button>
+        <button type="button" class="jgd-nav__btn" data-jgd-zone="dodi"><i style="--c:#7dff4f"></i>Dodi</button>
+        <button type="button" class="jgd-nav__btn" data-jgd-zone="vault"><i style="--c:#e0b46a"></i>The Vault</button>
+      </nav>
+
+      <div class="jgd-hint" data-jgd-hint>Drag to explore · Tap a district</div>
+      <div class="jgd-tooltip" data-jgd-tooltip role="status" aria-live="polite"></div>
+
+      <!-- Modal: stadium launch video -->
+      <div class="jgd-modal jgd-modal--video" data-jgd-modal="video" role="dialog" aria-modal="true" aria-label="Game Day launch video" hidden>
+        <div class="jgd-modal__backdrop" data-jgd-close></div>
+        <div class="jgd-modal__panel">
+          <button class="jgd-close" type="button" data-jgd-close aria-label="Close">&times;</button>
+          <div class="jgd-video">
+            <iframe data-jgd-video title="Jeeter Game Day Kickoff" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>
+            <div class="jgd-video__fallback" data-jgd-video-fallback hidden>
+              <div class="jgd-wordmark">Jeeter</div>
+              <p>The Game Day launch film drops soon.</p>
+            </div>
+          </div>
+          <div class="jgd-modal__caption"><span class="jgd-kicker">Game Day Stadium</span><strong>Kickoff · Higher Together</strong></div>
+        </div>
+      </div>
+
+      <!-- Modal: Highsman athlete bio & wellness -->
+      <div class="jgd-modal jgd-modal--feature jgd-theme-highsman" data-jgd-modal="highsman" role="dialog" aria-modal="true" aria-labelledby="jgd-hs-title" hidden>
+        <div class="jgd-modal__backdrop" data-jgd-close></div>
+        <div class="jgd-modal__panel">
+          <button class="jgd-close" type="button" data-jgd-close aria-label="Close">&times;</button>
+          <div class="jgd-feature__hero">
+            <img class="jgd-feature__logo" data-jgd-logo="highsman" alt="Highsman" />
+            <span class="jgd-kicker" data-jgd-field="kicker"></span>
+            <h2 id="jgd-hs-title" data-jgd-field="title"></h2>
+            <p class="jgd-feature__sub" data-jgd-field="subtitle"></p>
+          </div>
+          <div class="jgd-feature__body">
+            <p data-jgd-field="bio"></p>
+            <div class="jgd-stats" data-jgd-highlights></div>
+            <h3>Soundbites</h3>
+            <ul class="jgd-sound" data-jgd-soundbites></ul>
+            <a class="jgd-btn jgd-btn--solid" data-jgd-cta target="_blank" rel="noopener"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: PRIMITIV botanical lab & formulations -->
+      <div class="jgd-modal jgd-modal--feature jgd-theme-primitiv" data-jgd-modal="primitiv" role="dialog" aria-modal="true" aria-labelledby="jgd-pr-title" hidden>
+        <div class="jgd-modal__backdrop" data-jgd-close></div>
+        <div class="jgd-modal__panel">
+          <button class="jgd-close" type="button" data-jgd-close aria-label="Close">&times;</button>
+          <div class="jgd-feature__hero">
+            <img class="jgd-feature__logo" data-jgd-logo="primitiv" alt="PRIMITIV" />
+            <span class="jgd-kicker" data-jgd-field="kicker"></span>
+            <h2 id="jgd-pr-title" data-jgd-field="title"></h2>
+            <p class="jgd-feature__sub" data-jgd-field="subtitle"></p>
+          </div>
+          <div class="jgd-feature__body">
+            <p data-jgd-field="intro"></p>
+            <div class="jgd-tabs" role="tablist" data-jgd-tabs></div>
+            <div class="jgd-lab">
+              <div class="jgd-lab__mood" data-jgd-mood></div>
+              <div class="jgd-bars" data-jgd-bars></div>
+            </div>
+            <a class="jgd-btn jgd-btn--solid" data-jgd-cta target="_blank" rel="noopener"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer: Dodi store -->
+      <div class="jgd-modal jgd-modal--drawer jgd-theme-dodi" data-jgd-modal="dodi" role="dialog" aria-modal="true" aria-labelledby="jgd-dodi-title" hidden>
+        <div class="jgd-modal__backdrop" data-jgd-close></div>
+        <aside class="jgd-modal__panel jgd-drawer">
+          <button class="jgd-close" type="button" data-jgd-close aria-label="Close">&times;</button>
+          <div class="jgd-drawer__head">
+            <img class="jgd-feature__logo" data-jgd-logo="dodi" alt="Dodi" />
+            <span class="jgd-kicker" data-jgd-field="kicker"></span>
+            <h2 id="jgd-dodi-title" data-jgd-field="title"></h2>
+            <p class="jgd-feature__sub" data-jgd-field="subtitle"></p>
+          </div>
+          <div class="jgd-products" data-jgd-products></div>
+        </aside>
+      </div>
+
+      <!-- Modal: Vault collectible locker -->
+      <div class="jgd-modal jgd-modal--vault" data-jgd-modal="vault" role="dialog" aria-modal="true" aria-labelledby="jgd-vault-title" hidden>
+        <div class="jgd-modal__backdrop" data-jgd-close></div>
+        <div class="jgd-modal__panel">
+          <button class="jgd-close" type="button" data-jgd-close aria-label="Close">&times;</button>
+          <div class="jgd-vault__head">
+            <span class="jgd-kicker" data-jgd-field="kicker"></span>
+            <h2 id="jgd-vault-title" data-jgd-field="title"></h2>
+            <p class="jgd-feature__sub" data-jgd-field="subtitle"></p>
+          </div>
+          <div class="jgd-locker" data-jgd-cards></div>
+        </div>
+      </div>
+
+      <noscript><div class="jgd-noscript">Enable JavaScript to explore the Game Day world.</div></noscript>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
