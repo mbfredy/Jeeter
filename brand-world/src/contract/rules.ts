@@ -56,25 +56,27 @@ const ALIASES: Record<string, string> = {
   playerstart: 'spawn_main',
 };
 
-function editDistance(a: string, b: string): number {
+// Optimal string alignment distance: edits plus adjacent transpositions,
+// so "hotpsot" is one step from "hotspot".
+function typoDistance(a: string, b: string): number {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
-      d[i][j] = Math.min(
-        d[i - 1][j] + 1,
-        d[i][j - 1] + 1,
-        d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
-      );
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
     }
   }
   return d[a.length][b.length];
 }
 
 // Art meshes can be named anything. A name only counts as an unknown prefix
-// when it looks like a contract name that went wrong: a typo ("hotpsot_"),
-// wrong case ("Hotspot_"), wrong separator ("door-"), or an unsupported
-// variant of an exact name ("spawn_side"). Returns the intended prefix.
+// when it looks like a contract name that went wrong: wrong case
+// ("Hotspot_"), wrong separator ("door-"), an unsupported variant of an
+// exact name ("spawn_side"), a known alias ("collision_"), or a one-letter
+// typo in a stem of 5+ letters ("hotpsot_"). Kept strict so ordinary art
+// names (lane, floor, street) never warn.
 export function suspectedPrefix(name: string): string | undefined {
   if (ruleFor(name)) return undefined;
   const n = baseName(name);
@@ -84,7 +86,7 @@ export function suspectedPrefix(name: string): string | undefined {
   if (ALIASES[lower]) return ALIASES[lower];
   for (const known of KNOWN_STEMS) {
     const rule = RULES.find((r) => r.match.startsWith(known))!;
-    if (lower === known || (lower.length >= 4 && editDistance(lower, known) <= 2)) {
+    if (lower === known || (lower.length >= 5 && known.length >= 5 && typoDistance(lower, known) === 1)) {
       return rule.match;
     }
   }

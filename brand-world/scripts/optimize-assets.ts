@@ -11,6 +11,8 @@ import { listDrops } from './lib/drops.ts';
 import { CONTENT_OUT, ROOT } from './lib/paths.ts';
 import { Report, printReports } from './lib/report.ts';
 import { bakeNavMesh } from './lib/navmesh.ts';
+import { mergeDecor } from './lib/mergeDecor.ts';
+import { ruleFor } from '../src/contract/rules.ts';
 
 const budgets = JSON.parse(fs.readFileSync(path.join(ROOT, 'config/budgets.json'), 'utf8'));
 
@@ -31,6 +33,19 @@ function copyBasisTranscoder() {
   const out = path.join(ROOT, 'public', 'basis');
   fs.mkdirSync(out, { recursive: true });
   for (const f of ['basis_transcoder.js', 'basis_transcoder.wasm']) fs.copyFileSync(path.join(src, f), path.join(out, f));
+}
+
+// Rough draw-call count: visible mesh primitives (hidden logic nodes excluded).
+function drawCalls(doc: import('@gltf-transform/core').Document): number {
+  return doc.getRoot().listNodes().reduce((n, node) => {
+    const kind = ruleFor(node.getName())?.kind;
+    if (kind === 'nav' || kind === 'collider' || kind === 'zone') return n;
+    return n + (node.getMesh()?.listPrimitives().length ?? 0);
+  }, 0);
+}
+
+function contractNames(doc: import('@gltf-transform/core').Document): Set<string> {
+  return new Set(doc.getRoot().listNodes().map((n) => n.getName()).filter((n) => ruleFor(n)));
 }
 
 async function main() {
@@ -57,7 +72,11 @@ async function main() {
         fs.writeFileSync(path.join(outDir, scene.navmesh), nav);
       }
 
+      const callsBefore = drawCalls(doc);
+      const contractBefore = contractNames(doc);
       await doc.transform(
+        dedup(),
+        mergeDecor(),
         dedup(),
         // keepLeaves: spawn_main is an empty node and must survive.
         // keepAttributes: screen_* meshes need UVs even with no texture yet.
@@ -66,13 +85,16 @@ async function main() {
         ...(doc.getRoot().listTextures().length ? [await textureStep(report)] : []),
         meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
       );
+      // Guard: optimization must never drop a contract node.
+      const lost = [...contractBefore].filter((n) => !contractNames(doc).has(n));
+      if (lost.length) report.error(`Optimizer removed contract objects: ${lost.join(', ')}. This is a pipeline bug; report it to engineering.`);
       const out = path.join(outDir, scene.glb);
       await io.write(out, doc);
       const bytes = fs.statSync(out).size;
       if (bytes > budgets.maxGlbBytesCompressed) {
         report.error(`After compression the file is ${(bytes / 1048576).toFixed(1)} MB; the budget is ${(budgets.maxGlbBytesCompressed / 1048576).toFixed(0)} MB. Reduce texture sizes or count first, then geometry.`);
       }
-      console.log(`  ${drop.id}/${scene.glb}: ${(bytes / 1024).toFixed(1)} KB${scene.navmesh ? ' + navmesh' : ''}`);
+      console.log(`  ${drop.id}/${scene.glb}: ${(bytes / 1024).toFixed(1)} KB, draw calls ${callsBefore} -> ${drawCalls(doc)}${scene.navmesh ? ', navmesh baked' : ''}`);
     }
 
     for (const media of Object.values(district.media)) {

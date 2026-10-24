@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { passAgeGate, waitForScene, waitUntilStill } from './helpers.ts';
+import { passAgeGate, trackVideos, waitForScene, waitUntilStill } from './helpers.ts';
 
 // Full keyboard play: walk with WASD, use things with E, close with E/Escape.
 test('play the slice with only the keyboard', async ({ page }) => {
+  // Frozen screens so "wait until the view stops changing" works.
+  await trackVideos(page, { freeze: true });
   await page.goto('./');
   await passAgeGate(page);
   await waitForScene(page, 'plaza');
@@ -23,7 +25,7 @@ test('play the slice with only the keyboard', async ({ page }) => {
   await page.keyboard.down('w');
   await page.keyboard.down('d');
   await page.waitForTimeout(1000);
-  await waitUntilStill(page);
+  await waitUntilStill(page, 30_000);
   await page.keyboard.up('w');
   await page.keyboard.down('s');
   await expect(prompt).toContainText('Enter the factory', { timeout: 15_000 });

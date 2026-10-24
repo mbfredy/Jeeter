@@ -42,12 +42,12 @@ test('Quest: tabletop, walk in, thumbstick walk, interact with A', async ({ page
   await page.evaluate(() => (window as unknown as Handles).__world.getState().set({ panel: null }));
 
   // Straight ahead (-Z) until the factory wall stops us: the navmesh clamps.
-  await pushUntil(page, 0, -1, 'zBelow', -9);
+  await pushUntil(page, 0, -1, 'zBelow', -15);
   await stick(page, 'left', 0, -1);
   await page.waitForTimeout(2000);
   await stick(page, 'left', 0, 0);
   const atWall = await world(page);
-  expect(atWall.z).toBeGreaterThan(-11); // wall face at -11
+  expect(atWall.z).toBeGreaterThan(-20.5); // factory wall face at -20
 
   // Snap turn right 30 degrees; pushing forward now slides east along the wall.
   await stick(page, 'right', 1, 0);

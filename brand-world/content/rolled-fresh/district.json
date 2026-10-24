@@ -5,24 +5,60 @@
     "plaza": {
       "glb": "scenes/plaza.glb",
       "walkIn": true,
-      "tabletopScale": 0.03
+      "tabletopScale": 0.012,
+      "isoViewMeters": 40,
+      "atmosphere": {
+        "background": "#f2c49b",
+        "fog": {
+          "color": "#f0c8a2",
+          "near": 90,
+          "far": 300
+        },
+        "sky": "#ffe4c4",
+        "ground": "#6b5a78",
+        "ambient": 1.3,
+        "sun": {
+          "color": "#ffd29a",
+          "intensity": 2.4,
+          "direction": [
+            -0.8,
+            1,
+            0.5
+          ]
+        }
+      }
     },
     "factory_interior": {
       "glb": "scenes/factory_interior.glb",
       "walkIn": true,
-      "tabletopScale": 0.05
+      "tabletopScale": 0.05,
+      "isoViewMeters": 24,
+      "cutaway": true
     }
   },
   "media": {
-    "factory_loop": { "src": "media/factory_loop.mp4", "loop": true, "autoplayMuted": true }
+    "factory_loop": {
+      "src": "media/factory_loop.mp4",
+      "loop": true,
+      "autoplayMuted": true
+    },
+    "plaza_loop": {
+      "src": "media/factory_loop.mp4",
+      "loop": true,
+      "autoplayMuted": true
+    }
   },
   "links": {
-    "store_locator": { "url": "https://www.jeeter.com/" }
+    "store_locator": {
+      "url": "https://www.jeeter.com/"
+    }
   },
   "collectibles": {
     "factory_badge": {}
   },
   "visibility": {
-    "hotspot_store_link": { "hideInStates": [] }
+    "hotspot_corner_store": {
+      "hideInStates": []
+    }
   }
 }

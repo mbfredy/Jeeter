@@ -12,15 +12,16 @@ function createVideo(src: string, loop: boolean): HTMLVideoElement {
   return v;
 }
 
-// Puts a video texture on every screen_* mesh. One video plays with sound at
-// a time (store.playingMedia); others idle muted or paused.
+// Puts a video texture on every screen_* mesh. Screens showing the same
+// mediaId share one video element and texture (one decoder; matters on
+// Quest). One video plays with sound at a time (store.playingMedia).
 export function Screens() {
   const { contract } = useActiveScene();
   const district = useWorld((s) => s.district)!;
   const playing = useWorld((s) => s.playingMedia);
 
   useEffect(() => {
-    const videos: ScreenVideo[] = [];
+    const shared = new Map<string, ScreenVideo & { material: MeshBasicMaterial }>();
     const restore: [typeof contract.screens[number]['mesh'], Material | Material[]][] = [];
     for (const screen of contract.screens) {
       const media = district.media[screen.mediaId];
@@ -28,28 +29,29 @@ export function Screens() {
         console.warn(`[screens] ${screen.node}: unknown mediaId "${screen.mediaId}"`);
         continue;
       }
-      const video = createVideo(contentUrl(media.src), media.loop ?? true);
-      const map = new VideoTexture(video);
-      map.colorSpace = SRGBColorSpace;
-      map.flipY = false; // glTF UV convention
+      let entry = shared.get(screen.mediaId);
+      if (!entry) {
+        const video = createVideo(contentUrl(media.src), media.loop ?? true);
+        const map = new VideoTexture(video);
+        map.colorSpace = SRGBColorSpace;
+        map.flipY = false; // glTF UV convention
+        entry = { mediaId: screen.mediaId, video, material: new MeshBasicMaterial({ map, toneMapped: false }) };
+        shared.set(screen.mediaId, entry);
+        if (media.autoplayMuted) video.play().catch(() => {});
+      }
       restore.push([screen.mesh, screen.mesh.material]);
-      screen.mesh.material = new MeshBasicMaterial({ map, toneMapped: false });
-      videos.push({ mediaId: screen.mediaId, video });
-      if (media.autoplayMuted) video.play().catch(() => {});
+      screen.mesh.material = entry.material;
     }
-    setScreenVideos(videos);
+    setScreenVideos([...shared.values()]);
     return () => {
-      for (const { video } of videos) {
+      for (const { video, material } of shared.values()) {
         video.pause();
         video.removeAttribute('src');
         video.load();
+        material.map?.dispose();
+        material.dispose();
       }
-      for (const [mesh, original] of restore) {
-        const m = mesh.material as MeshBasicMaterial;
-        m.map?.dispose();
-        m.dispose();
-        mesh.material = original;
-      }
+      for (const [mesh, original] of restore) mesh.material = original;
       setScreenVideos([]);
     };
   }, [contract, district]);

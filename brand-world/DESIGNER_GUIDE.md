@@ -27,6 +27,8 @@ Tips:
 - Blender's `.001` suffixes are fine (`hotspot_kiosk.001`).
 - Lighting: bake it into textures. The app adds no shadows.
 - Don't rely on object scale for anything; the optimizer may rewrite it.
+- Group decoration under one Empty per building or area (e.g. `theater`, `plaza_props`). The optimizer merges each group by material so Quest and phones can draw it fast. Don't group the whole map under one Empty.
+- The placeholder district marks where your pieces go: `blockout_plinth_*` for sculptures and centerpieces, `blockout_sign_*` for signage. Replace them with your art.
 
 ## 2. Add custom properties
 

@@ -69,6 +69,16 @@ brand-world/
 
 Keep files small and single-purpose. Behavior per prefix lives in `src/contract/prefixes/`, per action in `src/interactions/actions/`.
 
+## Scene options (district.json `scenes.<id>`)
+
+`glb`, `walkIn`, `tabletopScale` (XR diorama scale), `isoViewMeters` (flat camera framing, default 24), `cutaway` (interiors: fade geometry between camera and player; needs one top-level group per wall), `atmosphere` (`background`, `fog`, `sky`, `ground`, `ambient`, `sun`). Outdoors the player shows an x-ray silhouette through occluders instead of a cutaway.
+
+Screens sharing a `mediaId` share one video decoder.
+
+## Placeholder district
+
+`scripts/placeholders/` builds the blockout from primitives (`builder.ts`, `palette.ts`, `props.ts`, `buildings.ts`, `plaza.ts`, `factory.ts`), seeded so output is deterministic. Layout follows the concept board loosely. Per the compliance rules it adds no sculptures, characters or signage text: those spots are `blockout_plinth_*` and `blockout_sign_*` objects for designers to replace.
+
 ## Controls
 
 | Platform | Move | Interact |
@@ -121,7 +131,9 @@ The registry (`import.meta.glob`) and the validator (reads the folder) both pick
 - 2048 px max texture dimension
 - 8 MB per GLB after compression
 
-Pipeline: `validate-assets` → `optimize-assets` (dedup, prune, weld, KTX2 ETC1S textures, Meshopt geometry, navmesh bake). KTX2 needs `toktx` (KTX-Software) on the build machine; without it textures fall back to WebP with a warning. Install it in CI for production.
+Pipeline: `validate-assets` → `optimize-assets` (navmesh bake, dedup, decoration merge, prune, weld, KTX2 ETC1S textures, Meshopt geometry). The optimizer prints draw calls before/after and fails if any contract node goes missing.
+
+Decoration merge (`scripts/lib/mergeDecor.ts`): every non-contract mesh under a top-level group is joined by material into that group, so a group costs one draw call per material (placeholder plaza: 911 → 90). Contract nodes are never merged. Group per building or area, not per prop. KTX2 needs `toktx` (KTX-Software) on the build machine; without it textures fall back to WebP with a warning. Install it in CI for production.
 
 Quest standalone rules:
 

@@ -21,7 +21,6 @@
     "scene.plaza": "Plaza",
     "scene.factory_interior": "Factory",
     "node.hotspot_info_kiosk": "Info kiosk",
-    "node.hotspot_store_link": "Find a store",
     "node.door_factory": "Enter the factory",
     "node.door_exit_plaza": "Back to the plaza",
     "node.hotspot_line_info": "Production line",
@@ -33,7 +32,22 @@
     "panel.line_info.body": "Placeholder panel copy about the production line. Replace in copy.json.",
     "collect.factory_badge": "Factory badge",
     "ui.interactKey": "E",
-    "ui.xrMoveHint": "Left stick: move. Right stick: turn. A: interact."
+    "ui.xrMoveHint": "Left stick: move. Right stick: turn. A: interact.",
+    "node.hotspot_corner_store": "Corner store",
+    "node.hotspot_theater": "Theater box office",
+    "node.screen_theater_marquee": "Theater screen",
+    "node.hotspot_comic_shop": "Comic shop",
+    "node.screen_comics_billboard": "Billboard",
+    "node.hotspot_boutique": "Find a store",
+    "node.hotspot_palace": "Palace",
+    "panel.corner_store.title": "Corner store",
+    "panel.corner_store.body": "Placeholder copy for the corner store. Replace in copy.json.",
+    "panel.theater.title": "Theater",
+    "panel.theater.body": "Placeholder copy for the theater. Replace in copy.json.",
+    "panel.comic_shop.title": "Comic shop",
+    "panel.comic_shop.body": "Placeholder copy for the comic shop. Replace in copy.json.",
+    "panel.palace.title": "Palace",
+    "panel.palace.body": "Placeholder copy for the palace. Replace in copy.json."
   },
   "overrides": {
     "US-NY": {}

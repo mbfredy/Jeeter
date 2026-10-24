@@ -55,6 +55,11 @@ export function Player() {
         <capsuleGeometry args={[0.3, 1.2, 4, 12]} />
         <meshStandardMaterial color="#e8e8e8" />
       </mesh>
+      {/* X-ray silhouette: keeps the player visible behind buildings and palms. */}
+      <mesh position={[0, 0.9, 0]} renderOrder={999} visible={xrMode === 'none'}>
+        <capsuleGeometry args={[0.3, 1.2, 4, 12]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.35} depthTest={false} depthWrite={false} />
+      </mesh>
     </group>
   );
 }

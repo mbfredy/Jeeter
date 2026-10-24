@@ -8,6 +8,23 @@ export interface SceneDef {
   // In XR, scenes without walkIn only show as a tabletop model.
   walkIn?: boolean;
   tabletopScale?: number;
+  // Flat-screen camera: metres visible across the shorter screen side.
+  isoViewMeters?: number;
+  // Flat-screen interiors: fade whatever sits between camera and player.
+  // Needs one top-level group per wall, since fading works per merged group.
+  cutaway?: boolean;
+  atmosphere?: Atmosphere;
+}
+
+// Per-scene lighting and sky. Colors are CSS hex; omitted fields use the
+// engine's neutral defaults.
+export interface Atmosphere {
+  background?: string;
+  fog?: { color: string; near: number; far: number };
+  sky?: string;
+  ground?: string;
+  ambient?: number;
+  sun?: { color: string; intensity: number; direction: [number, number, number] };
 }
 
 export interface MediaDef {

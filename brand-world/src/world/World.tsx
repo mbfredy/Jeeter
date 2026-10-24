@@ -11,6 +11,8 @@ import { Overlay } from '../ui/dom/Overlay.tsx';
 import { XrPanel } from '../ui/xr/XrPanel.tsx';
 import { ProximityWatcher } from '../player/ProximityWatcher.tsx';
 import { ActiveScene } from './ActiveScene.tsx';
+import { useActiveScene } from './SceneContext.ts';
+import { Atmosphere } from './Atmosphere.tsx';
 import { SceneModel } from './SceneModel.tsx';
 import { Screens } from './Screens.tsx';
 import { ZoneWatcher } from './ZoneWatcher.tsx';
@@ -31,10 +33,11 @@ if (import.meta.env.DEV && import.meta.env.VITE_XR_EMULATE === 'true') {
 
 function FlatOnly() {
   const xrMode = useWorld((s) => s.xrMode);
+  const cutaway = useActiveScene().def.cutaway;
   return xrMode === 'none' ? (
     <>
       <IsoCamera />
-      <OccluderFade />
+      {cutaway && <OccluderFade />}
     </>
   ) : null;
 }
@@ -55,17 +58,14 @@ export function World() {
     <>
       <Canvas
         orthographic
-        camera={{ position: [18, 20, 18], near: 0.1, far: 500 }}
+        camera={{ position: [36, 40, 36], near: 0.1, far: 800 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         style={{ position: 'fixed', inset: 0 }}
       >
-        <color attach="background" args={['#1b1b1d']} />
         <XR store={xrStore}>
-          {/* Default lighting for blockouts; real scenes should bake light in Blender. */}
-          <hemisphereLight args={['#ffffff', '#444444', 1.6]} />
-          <directionalLight position={[10, 20, 8]} intensity={1.6} />
           <ActiveScene>
+            <Atmosphere />
             <XrRig>
               <SceneModel />
               <Player />

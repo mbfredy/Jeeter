@@ -20,6 +20,11 @@ test('near-miss names are flagged, art names are not', () => {
   expect(suspectedPrefix('spawn_side')).toBe('spawn_main');
   expect(suspectedPrefix('doorframe_left')).toBeUndefined();
   expect(suspectedPrefix('bench_01')).toBeUndefined();
+  expect(suspectedPrefix('colider_wall')).toBe('collider_');
+  // Ordinary art names that sit close to contract stems.
+  for (const art of ['lane_3', 'floor', 'street_north', 'zones_art', 'nave', 'doorway', 'plots_garden']) {
+    expect(suspectedPrefix(art), art).toBeUndefined();
+  }
 });
 
 test('age check', () => {
