@@ -30,6 +30,24 @@ Tips:
 - Group decoration under one Empty per building or area (e.g. `theater`, `plaza_props`). The optimizer merges each group by material so Quest and phones can draw it fast. Don't group the whole map under one Empty.
 - The placeholder district marks where your pieces go: `blockout_plinth_*` for sculptures and centerpieces, `blockout_sign_*` for signage. Replace them with your art.
 
+## How your art is seen
+
+The same scene is shown three ways, so model for the closest one:
+
+| View | Where | Camera |
+|---|---|---|
+| Overview | Phone and desktop (default) | Isometric, from high above, about 40 m across the screen |
+| Street view | Phone and desktop (toggle) | First person at **1.6 m eye height**, looking anywhere |
+| VR | Quest | Tabletop miniature, or walk-in at 1:1 scale with eye height = the visitor's real height |
+
+What that means in Blender:
+- **Work in real-world scale: 1 Blender unit = 1 metre.** Doors about 2.2 m tall, counters about 1 m, steps 15-18 cm. Wrong scale is very noticeable in VR.
+- **Everything at eye level gets inspected up close** in street view and VR: storefronts, signs, kiosks, benches, the fountain. Spend detail and texture resolution there.
+- **Roofs and tops of tall things are mostly seen from above** in the overview. Keep them clean and readable, not detailed.
+- **Background (skyline, bridge, water)** is seen only from far away. Keep it very low-poly.
+- **`spawn_main` sets where people start and which way they face** in street view and VR. Point the Empty's green **+Y** axis where they should look.
+- Leave **at least 1.2 m** of walkable floor in front of anything interactive, and don't block sightlines to doors at eye height.
+
 ## 2. Add custom properties
 
 1. Select the object.

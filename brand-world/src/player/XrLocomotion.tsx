@@ -20,16 +20,28 @@ const UP = new Vector3(0, 1, 0);
 // right stick snap-turns, A or X uses the nearby object. Moves the XR origin
 // directly every frame; never through React state.
 export function XrLocomotion({ origin }: { origin: RefObject<Group | null> }) {
-  const { nav } = useActiveScene();
+  const { nav, contract } = useActiveScene();
   const camera = useThree((s) => s.camera);
   const left = useXRInputSourceState('controller', 'left');
   const rightHand = useXRInputSourceState('controller', 'right');
   const turnLatched = useRef(false);
   const buttonHeld = useRef(false);
+  // Which scene the origin was last placed for (null = not in walk-in).
+  const placedFor = useRef<object | null>(null);
 
   useFrame((_, dt) => {
     const o = origin.current;
-    if (!o || !nav || useWorld.getState().xrMode !== 'walkin') return;
+    if (!o || !nav || useWorld.getState().xrMode !== 'walkin') {
+      placedFor.current = null;
+      return;
+    }
+    // First walk-in frame (or new scene): stand at the player's spot.
+    if (placedFor.current !== contract) {
+      placedFor.current = contract;
+      o.position.copy(player.position);
+      o.rotation.set(0, 0, 0);
+      return;
+    }
     dt = Math.min(dt, 0.1);
     camera.getWorldPosition(head);
 

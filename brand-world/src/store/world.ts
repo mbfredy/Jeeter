@@ -5,6 +5,8 @@ import type { Region } from '../content/region.ts';
 import type { Device } from '../boot/device.ts';
 
 export type XrMode = 'none' | 'tabletop' | 'walkin';
+// Flat screens only: isometric overview or first-person street view.
+export type ViewMode = 'overview' | 'street';
 
 export interface Interactable {
   node: string;
@@ -29,6 +31,9 @@ interface WorldState {
   // Interactable within reach of the player, if any.
   nearby: string | null;
   xrMode: XrMode;
+  viewMode: ViewMode;
+  // Street view on desktop: mouse captured for looking.
+  pointerLocked: boolean;
   // progress
   unlocked: string[];
   collected: string[];
@@ -59,6 +64,8 @@ export const useWorld = create<WorldState>()(
       interactables: [],
       nearby: null,
       xrMode: 'none',
+      viewMode: 'overview',
+      pointerLocked: false,
       unlocked: [],
       collected: [],
       panel: null,

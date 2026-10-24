@@ -22,7 +22,8 @@ export function XrRig({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return;
-    set({ xrMode: 'tabletop' });
+    // XR drives its own camera; leave street view so flat mode resumes cleanly.
+    set({ xrMode: 'tabletop', viewMode: 'overview' });
     bus.emit({ type: 'xr', state: 'enter' });
     return () => {
       set({ xrMode: 'none' });
@@ -36,14 +37,12 @@ export function XrRig({ children }: { children: ReactNode }) {
 
   const walkin = xrMode === 'walkin';
 
-  // Entering walk-in, or arriving in a new scene: stand at the player's spot.
-  // Afterwards the origin is moved imperatively (no React state per frame).
+  // Leaving walk-in: the play space goes back to the room origin. Entering
+  // walk-in is handled inside XrLocomotion's frame loop, so the origin is
+  // placed before any head-to-player sync can run.
   useEffect(() => {
-    const o = origin.current;
-    if (!o) return;
-    if (walkin) o.position.copy(player.position);
-    else o.position.set(0, 0, 0);
-    o.rotation.set(0, 0, 0);
+    if (!walkin) origin.current?.position.set(0, 0, 0);
+    origin.current?.rotation.set(0, 0, 0);
   }, [walkin, contract]);
 
   // Teleport needs hittable geometry; the navmesh source is hidden, so use

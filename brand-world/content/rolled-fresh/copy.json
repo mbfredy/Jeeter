@@ -47,7 +47,12 @@
     "panel.comic_shop.title": "Comic shop",
     "panel.comic_shop.body": "Placeholder copy for the comic shop. Replace in copy.json.",
     "panel.palace.title": "Palace",
-    "panel.palace.body": "Placeholder copy for the palace. Replace in copy.json."
+    "panel.palace.body": "Placeholder copy for the palace. Replace in copy.json.",
+    "ui.streetView": "Street view",
+    "ui.overview": "Overview",
+    "ui.streetHintDesktop": "Click to look around, WASD to walk, E to interact, V for overview",
+    "ui.streetHintLocked": "Mouse to look, click or E to interact, Esc frees the mouse",
+    "ui.streetHintTouch": "Left thumb to walk, drag to look"
   },
   "overrides": {
     "US-NY": {}

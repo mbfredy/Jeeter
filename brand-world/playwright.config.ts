@@ -16,7 +16,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } }, testMatch: /e2e\/.*\.spec\.ts/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /world\.spec/ },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /(world|street)\.spec/ },
     { name: 'node', testMatch: /validator\.spec|rules\.spec/ },
     // WebXR via the Meta Quest 3 emulator on the dev server (see quest.spec.ts).
     { name: 'quest', use: { baseURL: 'http://localhost:5180/', viewport: { width: 1280, height: 800 } }, testMatch: /xr\/.*\.spec\.ts/ },

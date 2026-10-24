@@ -28,6 +28,9 @@ export function SceneModel() {
 
   function onClick(e: ThreeEvent<MouseEvent>) {
     e.stopPropagation();
+    // A drag (street-view look) is not a tap; captured-mouse clicks are
+    // handled by the crosshair in StreetControls.
+    if (e.delta > 6 || document.pointerLockElement) return;
     for (let o: typeof e.object | null = e.object; o; o = o.parent) {
       const hit = contract.interactive.get(o.uuid);
       if (hit) return triggerNode(hit.node, contract);
@@ -40,7 +43,7 @@ export function SceneModel() {
       <primitive object={root} onClick={onClick} />
       {/* Catches taps on empty space so they still walk toward the nearest edge. */}
       {flat && (
-        <mesh visible={false} rotation-x={-Math.PI / 2} position-y={groundY - 0.05} onClick={(e) => (e.stopPropagation(), walkTo(e))}>
+        <mesh visible={false} rotation-x={-Math.PI / 2} position-y={groundY - 0.05} onClick={(e) => (e.stopPropagation(), e.delta <= 6 && !document.pointerLockElement && walkTo(e))}>
           <planeGeometry args={[1000, 1000]} />
         </mesh>
       )}

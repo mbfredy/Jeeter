@@ -37,6 +37,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid #8ab4ff; outline-
 .panel h2 { margin: 0; font-size: 1.2rem; }
 .panel p { margin: 0; color: var(--muted); }
 .corner { position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; }
-.hint { color: var(--muted); font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.85rem; max-width: 40vw; text-align: right; }
+.corner[hidden] { display: none; }
 .prompt { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: var(--panel); border-color: #666; font-weight: 600; }
 kbd { font: inherit; font-size: 0.85rem; border: 1px solid #888; border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; }
+.prompt.raised { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 150px); }
+.joystick { position: absolute; left: 24px; bottom: max(24px, env(safe-area-inset-bottom)); width: 130px; height: 130px; border-radius: 50%; background: rgba(20, 20, 22, 0.45); border: 2px solid rgba(255, 255, 255, 0.35); display: grid; place-items: center; touch-action: none; }
+.knob { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, 0.8); pointer-events: none; }
+.crosshair { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); pointer-events: none !important; }
+canvas { touch-action: none; }

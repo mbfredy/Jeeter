@@ -84,11 +84,15 @@ Screens sharing a `mediaId` share one video decoder.
 | Platform | Move | Interact |
 |---|---|---|
 | Desktop | WASD / arrow keys, or click the ground | Walk within 2.5 m of a hotspot, door or screen, then **E** or **Enter** (or click it). **E**/**Escape** closes panels. Tab reaches the Places menu. |
+| Desktop, street view (**V** or the button) | WASD; click to capture the mouse and look (pointer lock) | Crosshair click or **E**. Esc frees the mouse; opening a panel frees it too. |
 | Mobile | Tap the ground | Tap the object, or the on-screen prompt when in reach |
+| Mobile, street view | Left-thumb joystick; drag elsewhere to look | Tap the object or the prompt |
 | Quest (tabletop) | n/a | Point the controller ray at a hotspot or door and pull the trigger |
 | Quest (walk-in) | Left stick walks (kept on the navmesh), right stick snap-turns 30°, or trigger-teleport onto the floor | **A**/**X** uses what is in reach, or point and pull the trigger |
 
-Proximity (`store.nearby`) is computed in `player/ProximityWatcher.tsx` and shared by the keyboard, the on-screen prompt and the XR buttons (`interactions/nearbyAction.ts`). XR locomotion (`player/XrLocomotion.tsx`) moves the XR origin imperatively each frame; never route per-frame movement through React state.
+Street view (`store.viewMode`) swaps in a perspective camera at 1.6 m (`player/StreetCamera.tsx`, `StreetControls.tsx`, `lookState.ts`) and reuses the same navmesh, movement and interactions. Entering XR forces the overview. Taps that moved more than 6 px are drags, not clicks (`SceneModel`).
+
+Proximity (`store.nearby`) is computed in `player/ProximityWatcher.tsx` and shared by the keyboard, the on-screen prompt and the XR buttons (`interactions/nearbyAction.ts`). XR locomotion (`player/XrLocomotion.tsx`) moves the XR origin imperatively each frame; never route per-frame movement through React state. It also places the origin on the first walk-in frame of each scene; doing that in a React effect raced the frame loop and dropped players at the room origin.
 
 Hotspots, doors and screens do not block movement on their own. Designers put a `collider_*` around anything solid.
 

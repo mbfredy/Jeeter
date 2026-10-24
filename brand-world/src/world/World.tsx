@@ -4,6 +4,8 @@ import { XR, createXRStore } from '@react-three/xr';
 import { IsoCamera } from '../player/IsoCamera.tsx';
 import { OccluderFade } from '../player/OccluderFade.tsx';
 import { Player } from '../player/Player.tsx';
+import { StreetCamera } from '../player/StreetCamera.tsx';
+import { StreetControls } from '../player/StreetControls.tsx';
 import { player } from '../player/playerState.ts';
 import { XrRig } from '../player/XrRig.tsx';
 import { useWorld } from '../store/world.ts';
@@ -33,13 +35,23 @@ if (import.meta.env.DEV && import.meta.env.VITE_XR_EMULATE === 'true') {
 
 function FlatOnly() {
   const xrMode = useWorld((s) => s.xrMode);
+  const viewMode = useWorld((s) => s.viewMode);
   const cutaway = useActiveScene().def.cutaway;
-  return xrMode === 'none' ? (
+  if (xrMode !== 'none') return null;
+  if (viewMode === 'street') {
+    return (
+      <>
+        <StreetCamera />
+        <StreetControls />
+      </>
+    );
+  }
+  return (
     <>
       <IsoCamera />
       {cutaway && <OccluderFade />}
     </>
-  ) : null;
+  );
 }
 
 export function World() {
