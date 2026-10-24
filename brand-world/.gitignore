@@ -4,3 +4,4 @@ public/content
 public/basis
 test-results
 playwright-report
+.netlify
