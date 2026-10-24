@@ -1,0 +1,39 @@
+{
+  "default": {
+    "ui.loading": "Loading",
+    "ui.close": "Close",
+    "ui.enterVr": "Enter VR",
+    "ui.walkIn": "Walk in",
+    "ui.tabletop": "Tabletop view",
+    "ui.interactables": "Places nearby",
+    "ui.collected": "Collected",
+    "ui.wasdHint": "WASD to walk",
+    "ui.unlockAudio": "Tap the screen for sound",
+    "ageGate.title": "Are you 21 or older?",
+    "ageGate.body": "Enter your date of birth to continue.",
+    "ageGate.month": "Month",
+    "ageGate.day": "Day",
+    "ageGate.year": "Year",
+    "ageGate.submit": "Enter",
+    "ageGate.invalid": "Enter a valid date of birth.",
+    "ageGate.denied": "You must be 21 or older to enter this site.",
+    "geo.blocked": "This experience is not available in your region.",
+    "scene.plaza": "Plaza",
+    "scene.factory_interior": "Factory",
+    "node.hotspot_info_kiosk": "Info kiosk",
+    "node.hotspot_store_link": "Find a store",
+    "node.door_factory": "Enter the factory",
+    "node.door_exit_plaza": "Back to the plaza",
+    "node.hotspot_line_info": "Production line",
+    "node.hotspot_badge": "Collect the badge",
+    "node.screen_factory_wall": "Factory screen",
+    "panel.plaza_welcome.title": "Rolled Fresh",
+    "panel.plaza_welcome.body": "Placeholder panel copy. Replace in copy.json.",
+    "panel.line_info.title": "The line",
+    "panel.line_info.body": "Placeholder panel copy about the production line. Replace in copy.json.",
+    "collect.factory_badge": "Factory badge"
+  },
+  "overrides": {
+    "US-NY": {}
+  }
+}

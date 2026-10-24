@@ -1,0 +1,28 @@
+{
+  "id": "rolled-fresh",
+  "startScene": "plaza",
+  "scenes": {
+    "plaza": {
+      "glb": "scenes/plaza.glb",
+      "walkIn": true,
+      "tabletopScale": 0.03
+    },
+    "factory_interior": {
+      "glb": "scenes/factory_interior.glb",
+      "walkIn": true,
+      "tabletopScale": 0.05
+    }
+  },
+  "media": {
+    "factory_loop": { "src": "media/factory_loop.mp4", "loop": true, "autoplayMuted": true }
+  },
+  "links": {
+    "store_locator": { "url": "https://www.jeeter.com/" }
+  },
+  "collectibles": {
+    "factory_badge": {}
+  },
+  "visibility": {
+    "hotspot_store_link": { "hideInStates": [] }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "maxTrianglesPerScene": 100000,
+  "maxTextureSize": 2048,
+  "maxGlbBytesCompressed": 8388608
+}

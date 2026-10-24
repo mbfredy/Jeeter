@@ -1,0 +1,47 @@
+{
+  "name": "brand-world",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run assets && vite",
+    "assets": "npm run assets:validate && npm run assets:optimize",
+    "assets:placeholders": "node scripts/make-placeholders.ts",
+    "assets:validate": "node scripts/validate-assets.ts",
+    "assets:optimize": "node scripts/optimize-assets.ts",
+    "prebuild": "npm run assets",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "playwright test",
+    "test:update": "playwright test --update-snapshots"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@react-three/xr": "^6.6.32",
+    "@recast-navigation/three": "^0.43.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recast-navigation": "^0.43.1",
+    "three": "^0.186.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "meshoptimizer": "^1.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^6.4.5"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

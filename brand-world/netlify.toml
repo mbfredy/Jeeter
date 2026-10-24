@@ -1,0 +1,17 @@
+# Deploy as its own Netlify site with Base directory = brand-world.
+# The repo-root netlify.toml keeps deploying the Game Day app.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+[[headers]]
+  for = "/content/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"

@@ -1,0 +1,40 @@
+/* Functional UI chrome only. Brand styling belongs to the design team. */
+:root {
+  --bg: #111;
+  --fg: #f2f2f2;
+  --muted: #a8a8a8;
+  --accent: #f2f2f2;
+  --panel: rgba(20, 20, 22, 0.94);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; }
+button { font: inherit; cursor: pointer; border: 1px solid #555; background: #222; color: var(--fg); border-radius: 6px; padding: 0.55rem 0.9rem; min-height: 44px; }
+button.primary { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
+button:focus-visible, input:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+
+.screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: var(--bg); }
+.card { width: min(420px, 100%); background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 24px; display: grid; gap: 12px; }
+.card h1 { margin: 0; font-size: 1.4rem; }
+.card p { margin: 0; color: var(--muted); }
+.row { display: flex; gap: 8px; }
+.field { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.field input { font: inherit; font-size: 1.1rem; padding: 0.5rem; border-radius: 6px; border: 1px solid #555; background: #0c0c0c; color: var(--fg); width: 100%; }
+.error { color: #ff8a80 !important; }
+
+.overlay { position: fixed; inset: 0; pointer-events: none; }
+.overlay > * { pointer-events: auto; }
+.loading { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(280px, 80vw); text-align: center; display: grid; gap: 8px; }
+.bar { height: 4px; background: #333; border-radius: 2px; overflow: hidden; }
+.bar > div { height: 100%; background: var(--accent); transition: width 0.2s; }
+.places { position: absolute; top: max(12px, env(safe-area-inset-top)); left: 16px; display: grid; gap: 6px; justify-items: start; }
+.places ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.collected { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 16px; background: var(--panel); border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; }
+.collected ul { margin: 4px 0 0; padding-left: 18px; }
+.panel { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(480px, calc(100vw - 32px)); background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px; display: grid; gap: 10px; }
+.panel h2 { margin: 0; font-size: 1.2rem; }
+.panel p { margin: 0; color: var(--muted); }
+.corner { position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; }
+.hint { color: var(--muted); font-size: 0.85rem; }
