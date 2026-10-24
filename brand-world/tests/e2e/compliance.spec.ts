@@ -21,11 +21,12 @@ test('invalid birthdate is rejected', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('valid date');
 });
 
-test('the dev age-gate skip is not in the production build', async ({ page }) => {
+test('dev-only bypasses and test handles are not in the production build', async ({ page }) => {
   await page.goto('./?skipAgeGate');
   await expect(page.getByLabel('Year')).toBeVisible();
   const dir = path.resolve('dist/assets');
   for (const f of fs.readdirSync(dir).filter((f) => f.endsWith('.js'))) {
-    expect(fs.readFileSync(path.join(dir, f), 'utf8'), f).not.toContain('skipAgeGate');
+    const js = fs.readFileSync(path.join(dir, f), 'utf8');
+    for (const needle of ['skipAgeGate', '__xrStore', '__world', 'VITE_XR_EMULATE']) expect(js, `${f}: ${needle}`).not.toContain(needle);
   }
 });

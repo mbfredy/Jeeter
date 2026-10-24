@@ -38,3 +38,5 @@ button:focus-visible, input:focus-visible { outline: 2px solid #8ab4ff; outline-
 .panel p { margin: 0; color: var(--muted); }
 .corner { position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center; }
 .hint { color: var(--muted); font-size: 0.85rem; }
+.prompt { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: var(--panel); border-color: #666; font-weight: 600; }
+kbd { font: inherit; font-size: 0.85rem; border: 1px solid #888; border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; }

@@ -96,6 +96,8 @@ function plaza(): Document {
   b.box('zone_factory_approach', [8, 3, 6], [0, 1.5, -7], COL, { preload: 'factory_interior' });
   b.box('hotspot_info_kiosk', [1, 1.6, 1], [-6, 0.8, 3], HOT, { action: 'openPanel', contentId: 'plaza_welcome' });
   b.box('hotspot_store_link', [1, 1.6, 1], [6, 0.8, 3], HOT, { action: 'link', contentId: 'store_locator' });
+  b.box('collider_info_kiosk', [1, 1.6, 1], [-6, 0.8, 3], COL);
+  b.box('collider_store_link', [1, 1.6, 1], [6, 0.8, 3], COL);
   b.floor('plot_lot_01', 6, 6, [14, 0.01, 14], DARK);
   return b.doc;
 }
@@ -120,6 +122,8 @@ function factory(): Document {
   b.panel('screen_factory_wall', 6, 3.375, [0, 3, -7.95], '#111111', { mediaId: 'factory_loop' });
   b.box('hotspot_line_info', [1, 1.6, 1], [-6, 0.8, -1], HOT, { action: 'openPanel', contentId: 'line_info' });
   b.box('hotspot_badge', [0.6, 0.6, 0.6], [6, 0.8, -1], HOT, { action: 'collect', contentId: 'factory_badge' });
+  b.box('collider_line_info', [1, 1.6, 1], [-6, 0.8, -1], COL);
+  b.box('collider_badge', [0.6, 1.1, 0.6], [6, 0.55, -1], COL);
   b.box('door_exit_plaza', [2.4, 3, 0.3], [0, 1.5, 7.9], DOOR, { target: 'plaza' });
   return b.doc;
 }

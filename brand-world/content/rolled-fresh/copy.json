@@ -7,7 +7,7 @@
     "ui.tabletop": "Tabletop view",
     "ui.interactables": "Places nearby",
     "ui.collected": "Collected",
-    "ui.wasdHint": "WASD to walk",
+    "ui.wasdHint": "WASD or arrow keys to walk, E to interact",
     "ui.unlockAudio": "Tap the screen for sound",
     "ageGate.title": "Are you 21 or older?",
     "ageGate.body": "Enter your date of birth to continue.",
@@ -31,7 +31,9 @@
     "panel.plaza_welcome.body": "Placeholder panel copy. Replace in copy.json.",
     "panel.line_info.title": "The line",
     "panel.line_info.body": "Placeholder panel copy about the production line. Replace in copy.json.",
-    "collect.factory_badge": "Factory badge"
+    "collect.factory_badge": "Factory badge",
+    "ui.interactKey": "E",
+    "ui.xrMoveHint": "Left stick: move. Right stick: turn. A: interact."
   },
   "overrides": {
     "US-NY": {}

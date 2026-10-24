@@ -31,3 +31,17 @@ export async function trackVideos(page: Page, { freeze }: { freeze: boolean }) {
     };
   }, freeze);
 }
+
+// Waits until the canvas stops changing (player blocked or arrived, camera settled).
+export async function waitUntilStill(page: Page, timeout = 20_000) {
+  const canvas = page.locator('canvas');
+  const end = Date.now() + timeout;
+  let prev = await canvas.screenshot();
+  while (Date.now() < end) {
+    await page.waitForTimeout(400);
+    const next = await canvas.screenshot();
+    if (prev.equals(next)) return;
+    prev = next;
+  }
+  throw new Error('canvas never settled');
+}

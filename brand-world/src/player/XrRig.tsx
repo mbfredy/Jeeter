@@ -1,21 +1,24 @@
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { TeleportTarget, XROrigin, useXR } from '@react-three/xr';
-import { Mesh, MeshBasicMaterial, type Vector3 } from 'three';
+import { Mesh, MeshBasicMaterial, type Group, type Vector3 } from 'three';
 import { bus } from '../events/bus.ts';
 import { useWorld } from '../store/world.ts';
+import { XrHud } from '../ui/xr/XrHud.tsx';
 import { useActiveScene } from '../world/SceneContext.ts';
 import { player } from './playerState.ts';
+import { XrLocomotion } from './XrLocomotion.tsx';
 
 const TABLE_POSITION: [number, number, number] = [0, 0.85, -1.1];
 const invisible = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
 
-// XR: tabletop model of the scene by default; walk-in (1:1 with teleport)
-// only for scenes flagged walkIn in district.json.
+// XR: tabletop model of the scene by default; walk-in (1:1, thumbstick and
+// teleport) only for scenes flagged walkIn in district.json.
 export function XrRig({ children }: { children: ReactNode }) {
   const session = useXR((s) => s.session);
   const { def, contract } = useActiveScene();
   const xrMode = useWorld((s) => s.xrMode);
   const set = useWorld((s) => s.set);
+  const origin = useRef<Group>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -31,6 +34,18 @@ export function XrRig({ children }: { children: ReactNode }) {
     if (xrMode === 'walkin' && !def.walkIn) set({ xrMode: 'tabletop' });
   }, [def, xrMode, set]);
 
+  const walkin = xrMode === 'walkin';
+
+  // Entering walk-in, or arriving in a new scene: stand at the player's spot.
+  // Afterwards the origin is moved imperatively (no React state per frame).
+  useEffect(() => {
+    const o = origin.current;
+    if (!o) return;
+    if (walkin) o.position.copy(player.position);
+    else o.position.set(0, 0, 0);
+    o.rotation.set(0, 0, 0);
+  }, [walkin, contract]);
+
   // Teleport needs hittable geometry; the navmesh source is hidden, so use
   // invisible clones on the default layer.
   const teleportMeshes = useMemo(
@@ -44,14 +59,11 @@ export function XrRig({ children }: { children: ReactNode }) {
     [contract],
   );
 
-  const walkin = xrMode === 'walkin';
-  const origin = useWorld((s) => s.xrOrigin);
-  useEffect(() => set({ xrOrigin: walkin ? player.position.toArray() : [0, 0, 0] }), [walkin, contract, set]);
   const scale = walkin || xrMode === 'none' ? 1 : (def.tabletopScale ?? 0.05);
   const onTeleport = (p: Vector3) => {
     player.position.copy(p);
     player.path = [];
-    set({ xrOrigin: p.toArray() });
+    origin.current?.position.copy(p);
   };
 
   return (
@@ -64,7 +76,10 @@ export function XrRig({ children }: { children: ReactNode }) {
           </TeleportTarget>
         )}
       </group>
-      <XROrigin position={origin} />
+      <XROrigin ref={origin}>
+        <XrHud />
+      </XROrigin>
+      {xrMode !== 'none' && <XrLocomotion origin={origin} />}
     </>
   );
 }

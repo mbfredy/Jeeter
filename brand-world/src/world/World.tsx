@@ -4,16 +4,18 @@ import { XR, createXRStore } from '@react-three/xr';
 import { IsoCamera } from '../player/IsoCamera.tsx';
 import { OccluderFade } from '../player/OccluderFade.tsx';
 import { Player } from '../player/Player.tsx';
+import { player } from '../player/playerState.ts';
 import { XrRig } from '../player/XrRig.tsx';
 import { useWorld } from '../store/world.ts';
 import { Overlay } from '../ui/dom/Overlay.tsx';
-import { XrHud } from '../ui/xr/XrHud.tsx';
+import { XrPanel } from '../ui/xr/XrPanel.tsx';
+import { ProximityWatcher } from '../player/ProximityWatcher.tsx';
 import { ActiveScene } from './ActiveScene.tsx';
 import { SceneModel } from './SceneModel.tsx';
 import { Screens } from './Screens.tsx';
 import { ZoneWatcher } from './ZoneWatcher.tsx';
 
-const xrStore = createXRStore({
+export const xrStore = createXRStore({
   // Dev only: VITE_XR_EMULATE=true npm run dev fakes a Quest for desktop testing.
   emulate: import.meta.env.DEV && import.meta.env.VITE_XR_EMULATE === 'true' ? 'metaQuest3' : false,
   // Fixed foveation trades edge sharpness for frame rate on Quest.
@@ -21,6 +23,11 @@ const xrStore = createXRStore({
   controller: { teleportPointer: true },
   hand: { teleportPointer: true },
 });
+
+// Dev + emulator only: handles for tests/xr. Compiled out of production.
+if (import.meta.env.DEV && import.meta.env.VITE_XR_EMULATE === 'true') {
+  Object.assign(window, { __xrStore: xrStore, __world: useWorld, __player: player });
+}
 
 function FlatOnly() {
   const xrMode = useWorld((s) => s.xrMode);
@@ -63,9 +70,10 @@ export function World() {
               <SceneModel />
               <Player />
               <ZoneWatcher />
+              <ProximityWatcher />
               <Screens />
             </XrRig>
-            <XrHud />
+            <XrPanel />
             <FlatOnly />
           </ActiveScene>
         </XR>

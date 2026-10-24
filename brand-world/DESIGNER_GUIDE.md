@@ -22,6 +22,8 @@ Values for `action`: `openPanel`, `playVideo`, `loadScene`, `link`, `collect`. I
 Tips:
 - Keep `nav_walkable` slightly larger than the floor area you want and cut holes where people should not go. Colliders are subtracted automatically.
 - Collider and zone meshes can be low-poly boxes; they are never seen.
+- Hotspots, doors and screens don't block walking. Put a `collider_` box around anything people shouldn't walk through (kiosks, counters, props).
+- People can use a hotspot, door or screen from up to 2.5 m away (keyboard E, the on-screen prompt, or the A button on Quest). Leave walkable floor within that distance of each one.
 - Blender's `.001` suffixes are fine (`hotspot_kiosk.001`).
 - Lighting: bake it into textures. The app adds no shadows.
 - Don't rely on object scale for anything; the optimizer may rewrite it.

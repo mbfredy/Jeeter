@@ -1,17 +1,18 @@
+import { Text } from '@react-three/drei';
 import { bus } from '../../events/bus.ts';
 import { useWorld } from '../../store/world.ts';
 import { useActiveScene } from '../../world/SceneContext.ts';
 import { useT } from '../useT.ts';
-import { XrButton } from './XrButton.tsx';
-import { XrPanel } from './XrPanel.tsx';
+import { XrButton, useXrFont } from './XrButton.tsx';
 
-// In-scene UI for XR, placed in front of the play-space origin.
+// In-scene controls for XR. Lives inside XROrigin, so it moves and turns
+// with the play space.
 export function XrHud() {
   const t = useT();
+  const font = useXrFont();
   const { def } = useActiveScene();
   const xrMode = useWorld((s) => s.xrMode);
   const set = useWorld((s) => s.set);
-  const origin = useWorld((s) => s.xrOrigin);
   if (xrMode === 'none') return null;
 
   const toggle = () => {
@@ -21,11 +22,13 @@ export function XrHud() {
   };
 
   return (
-    <group position={origin}>
-      {def.walkIn && (
-        <XrButton label={t(xrMode === 'walkin' ? 'ui.tabletop' : 'ui.walkIn')} position={[0, 1.05, -0.6]} onClick={toggle} />
+    <group position={[0, 1.05, -0.6]} rotation-x={-0.5}>
+      {def.walkIn && <XrButton label={t(xrMode === 'walkin' ? 'ui.tabletop' : 'ui.walkIn')} position={[0, 0, 0]} onClick={toggle} />}
+      {xrMode === 'walkin' && (
+        <Text font={font} fontSize={0.022} position={[0, -0.07, 0]} color="#cccccc" anchorX="center" anchorY="top">
+          {t('ui.xrMoveHint')}
+        </Text>
       )}
-      <XrPanel position={[0, 1.45, -0.9]} />
     </group>
   );
 }

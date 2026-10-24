@@ -26,9 +26,9 @@ interface WorldState {
   sceneReady: boolean;
   loadProgress: number | null;
   interactables: Interactable[];
+  // Interactable within reach of the player, if any.
+  nearby: string | null;
   xrMode: XrMode;
-  // XR play-space origin, scene-local. Moves on teleport in walk-in mode.
-  xrOrigin: [number, number, number];
   // progress
   unlocked: string[];
   collected: string[];
@@ -57,8 +57,8 @@ export const useWorld = create<WorldState>()(
       sceneReady: false,
       loadProgress: null,
       interactables: [],
+      nearby: null,
       xrMode: 'none',
-      xrOrigin: [0, 0, 0],
       unlocked: [],
       collected: [],
       panel: null,

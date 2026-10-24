@@ -69,6 +69,23 @@ brand-world/
 
 Keep files small and single-purpose. Behavior per prefix lives in `src/contract/prefixes/`, per action in `src/interactions/actions/`.
 
+## Controls
+
+| Platform | Move | Interact |
+|---|---|---|
+| Desktop | WASD / arrow keys, or click the ground | Walk within 2.5 m of a hotspot, door or screen, then **E** or **Enter** (or click it). **E**/**Escape** closes panels. Tab reaches the Places menu. |
+| Mobile | Tap the ground | Tap the object, or the on-screen prompt when in reach |
+| Quest (tabletop) | n/a | Point the controller ray at a hotspot or door and pull the trigger |
+| Quest (walk-in) | Left stick walks (kept on the navmesh), right stick snap-turns 30°, or trigger-teleport onto the floor | **A**/**X** uses what is in reach, or point and pull the trigger |
+
+Proximity (`store.nearby`) is computed in `player/ProximityWatcher.tsx` and shared by the keyboard, the on-screen prompt and the XR buttons (`interactions/nearbyAction.ts`). XR locomotion (`player/XrLocomotion.tsx`) moves the XR origin imperatively each frame; never route per-frame movement through React state.
+
+Hotspots, doors and screens do not block movement on their own. Designers put a `collider_*` around anything solid.
+
+## Tests
+
+Playwright projects: `desktop` and `mobile` (production build on :4173), `node` (contract rules, validator), `quest` (dev server on :5180 with the Meta Quest 3 emulator; drives thumbsticks and buttons through dev-only `window.__xrStore/__world/__player` handles, which `compliance.spec.ts` asserts are absent from `dist/`). Tests run with one worker because software WebGL is CPU-bound and movement depends on frame rate; wait on conditions, not fixed sleeps.
+
 ## How to add a new drop
 
 1. Create `content/<new-drop-id>/` with `district.json`, `copy.json`, `scenes/`, `media/`. Copy the shape from `content/rolled-fresh/`.
