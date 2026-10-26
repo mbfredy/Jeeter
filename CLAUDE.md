@@ -3,9 +3,9 @@
 This repo holds two separate apps:
 
 - **Repo root**: the Game Day Kickoff world (vanilla Three.js, deployed by the root `netlify.toml`). Leave it alone unless asked.
-- **`brand-world/`**: the drop engine. A browser 3D world (desktop, mobile, Meta Quest Browser via WebXR) whose scenes come from designer GLBs and whose behavior and copy come from data. Everything below is about `brand-world/`.
+- **`jeeter-world/`** (Jeeter World - Donut): the drop engine. A browser 3D world (desktop, mobile, Meta Quest Browser via WebXR) whose scenes come from designer GLBs and whose behavior and copy come from data. Everything below is about `jeeter-world/`.
 
-Run all commands from `brand-world/`. Node 22.18+ (scripts are TypeScript run directly by Node; no tsx).
+Run all commands from `jeeter-world/`. Node 22.18+ (scripts are TypeScript run directly by Node; no tsx).
 
 ```bash
 npm install
@@ -39,7 +39,7 @@ Hidden kinds (nav, collider, zone) are moved to `LOGIC_LAYER` so pointer raycast
 ## Folder structure
 
 ```
-brand-world/
+jeeter-world/
   config/app.config.ts     active drop, min age, geo allow/block lists, scene residency
   config/budgets.json      per-scene budgets (validator + optimizer)
   content/<drop-id>/       SOURCE content (committed)

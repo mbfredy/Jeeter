@@ -1,4 +1,4 @@
-# Deploy as its own Netlify site with Base directory = brand-world.
+# Deploy as its own Netlify site with Base directory = jeeter-world.
 # The repo-root netlify.toml keeps deploying the Game Day app.
 [build]
   command = "npm run build"

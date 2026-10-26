@@ -1,4 +1,4 @@
-# Designer guide: Blender to brand world
+# Designer guide: Blender to Jeeter World - Donut
 
 The app reads your object **names** and **custom properties** and builds the interactive world from them. No code needed. One scene = one `.glb` file.
 
@@ -68,7 +68,7 @@ Use Object properties, not Mesh data properties.
 - **Animation**: off unless agreed
 - Textures: PNG or JPEG, at most 2048 x 2048
 
-Save to `brand-world/content/<drop-id>/scenes/<scene-id>.glb` (for example `content/rolled-fresh/scenes/plaza.glb`).
+Save to `jeeter-world/content/<drop-id>/scenes/<scene-id>.glb` (for example `content/rolled-fresh/scenes/plaza.glb`).
 
 ## 4. Budgets
 
@@ -76,7 +76,7 @@ Per scene: at most **100,000 triangles** (invisible nav/collider/zone meshes don
 
 ## 5. Run the validator
 
-From the `brand-world` folder:
+From the `jeeter-world` folder:
 
 ```bash
 npm install          # first time only

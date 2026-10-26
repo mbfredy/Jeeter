@@ -1,5 +1,6 @@
 {
   "default": {
+    "app.title": "Jeeter World - Donut",
     "ui.loading": "Loading",
     "ui.close": "Close",
     "ui.enterVr": "Enter VR",

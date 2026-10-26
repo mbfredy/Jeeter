@@ -26,6 +26,10 @@ export function BootFlow({ children }: { children: ReactNode }) {
       .catch((e: Error) => setError(e.message));
   }, [set]);
 
+  useEffect(() => {
+    if (district) document.title = t('app.title');
+  }, [district, t]);
+
   if (error) return <Notice text={error} />;
   if (!district || !region) return null;
   if (!isRegionAllowed(region)) return <Notice text={t('geo.blocked')} />;

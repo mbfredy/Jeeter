@@ -76,7 +76,7 @@ export const useWorld = create<WorldState>()(
     }),
     {
       // Session only: closing the tab ends the session and re-runs the gate.
-      name: 'brand-world-session',
+      name: 'jeeter-world-session',
       storage: createJSONStorage(() => sessionStorage),
       partialize: (s) => ({
         ageVerified: s.ageVerified,
